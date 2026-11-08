@@ -638,8 +638,8 @@ function renderizarAdmin() {
           </select>
         </td>
         <td class="text-end">
-          <button class="btn btn-sm btn-outline-primary btn-editar" data-id="${s.id}" title="Editar"><i class="bi bi-pencil"></i></button>
-          <button class="btn btn-sm btn-outline-danger btn-eliminar" data-id="${s.id}" title="Eliminar"><i class="bi bi-trash"></i></button>
+          <button class="btn btn-sm btn-outline-primary btn-editar" data-id="${s.id}" >Editar</button>
+          <button class="btn btn-sm btn-outline-danger btn-eliminar" data-id="${s.id}" >Eliminar</button>
         </td>
       </tr>`).join("");
   }

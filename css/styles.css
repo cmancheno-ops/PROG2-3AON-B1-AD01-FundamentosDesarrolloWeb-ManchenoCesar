@@ -122,3 +122,50 @@ body {
 /* Botón de confirmación de SweetAlert2 con el color institucional
    (los botones de eliminar mantienen el rojo definido en script.js) */
 .swal2-styled.swal2-confirm { background-color: var(--color-principal); }
+
+/* ==========================================================
+   Estilo sencillo (inspirado en Craigslist):
+   enlaces subrayados, botones planos grises, sin sombras
+   ========================================================== */
+
+/* Enlaces de texto: subrayados, sin efectos */
+a { color: var(--color-medio); text-decoration: underline; }
+a:hover { color: var(--color-oscuro); }
+.navbar .nav-link { color: #e8f6f0 !important; text-decoration: underline; padding: .25rem .5rem; }
+.navbar .nav-link:hover { color: #fff !important; }
+.navbar-brand { text-decoration: none; }
+
+/* Todos los botones: planos, gris claro, borde fino, esquinas poco redondeadas */
+.btn[class*="btn-"] {
+  --bs-btn-color: #222;
+  --bs-btn-bg: #f3f3f3;
+  --bs-btn-border-color: #aaa;
+  --bs-btn-hover-color: #000;
+  --bs-btn-hover-bg: #e2e2e2;
+  --bs-btn-hover-border-color: #888;
+  --bs-btn-active-color: #000;
+  --bs-btn-active-bg: #d6d6d6;
+  --bs-btn-active-border-color: #888;
+  --bs-btn-font-weight: 400;
+  --bs-btn-border-radius: 3px;
+  --bs-btn-box-shadow: none;
+  --bs-btn-focus-box-shadow: 0 0 0 2px #bbb;
+}
+.btn-lg { --bs-btn-padding-y: .375rem; --bs-btn-padding-x: .9rem; --bs-btn-font-size: 1rem; }
+.fw-semibold.btn { font-weight: 400 !important; }
+
+/* Acciones peligrosas o de activación: solo cambia el color del texto */
+.btn[class*="danger"]  { --bs-btn-color: #b00020; --bs-btn-hover-color: #b00020; }
+.btn[class*="success"] { --bs-btn-color: #116b3a; --bs-btn-hover-color: #116b3a; }
+.btn[class*="primary"] { --bs-btn-color: #0b4fa3; --bs-btn-hover-color: #0b4fa3; }
+
+/* Tarjetas y tablas sin sombras ni animación */
+.shadow, .shadow-sm { box-shadow: none !important; }
+.card { border-radius: 3px; }
+.tarjeta-servicio, .tarjeta-servicio:hover { transform: none; box-shadow: none; }
+
+/* Botones de SweetAlert2 con el mismo estilo plano */
+.swal2-styled.swal2-confirm, .swal2-styled.swal2-cancel {
+  background: #f3f3f3 !important; color: #222 !important;
+  border: 1px solid #aaa !important; border-radius: 3px !important; box-shadow: none !important;
+}
