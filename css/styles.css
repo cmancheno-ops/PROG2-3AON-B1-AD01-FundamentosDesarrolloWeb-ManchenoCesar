@@ -1,171 +1,120 @@
-/* ==========================================================
-   MotorPro - Estilos propios
-   Complementan a Bootstrap 5
-   ========================================================== */
+/* AD01 - MotorPro
+   Estilos propios (se usan junto con Bootstrap)
+   Colores parecidos a los del Instituto Cordillera
+   Botones y enlaces sencillos */
 
-/* Paleta inspirada en el sitio del Instituto Universitario Cordillera */
 :root {
-  --color-principal: #1fc47c;   /* verde del logo (acento, botones) */
-  --color-principal-hover: #17a467;
-  --color-oscuro: #06393a;      /* verde azulado oscuro (navbar, footer) */
-  --color-medio: #0c5254;       /* verde azulado (portada) */
-  --color-suave: #e8f6f0;       /* fondo claro de secciones */
-}
-
-/* ---------- Clases de color propias (reemplazan a warning/dark de Bootstrap) ---------- */
-.bg-itsco        { background-color: var(--color-principal) !important; }
-.bg-itsco-oscuro { background-color: var(--color-oscuro) !important; }
-.text-itsco      { color: var(--color-principal) !important; }
-.border-itsco    { border-color: var(--color-principal) !important; }
-.bg-light        { background-color: var(--color-suave) !important; }
-
-.btn-itsco {
-  --bs-btn-color: #fff;
-  --bs-btn-bg: var(--color-principal);
-  --bs-btn-border-color: var(--color-principal);
-  --bs-btn-hover-color: #fff;
-  --bs-btn-hover-bg: var(--color-principal-hover);
-  --bs-btn-hover-border-color: var(--color-principal-hover);
-  --bs-btn-active-color: #fff;
-  --bs-btn-active-bg: var(--color-principal-hover);
-  --bs-btn-active-border-color: var(--color-principal-hover);
-}
-.btn-outline-itsco {
-  --bs-btn-color: var(--color-oscuro);
-  --bs-btn-border-color: var(--color-oscuro);
-  --bs-btn-hover-color: #fff;
-  --bs-btn-hover-bg: var(--color-oscuro);
-  --bs-btn-hover-border-color: var(--color-oscuro);
-}
-.table-itsco {
-  --bs-table-color: #fff;
-  --bs-table-bg: var(--color-oscuro);
-  --bs-table-border-color: #0e4c4d;
-}
-.form-control:focus, .form-select:focus, .form-check-input:focus {
-  border-color: var(--color-principal);
-  box-shadow: 0 0 0 .25rem rgba(31, 196, 124, .25);
-}
-.form-check-input:checked {
-  background-color: var(--color-principal);
-  border-color: var(--color-principal);
+  --verde: #1fc47c;
+  --verde-oscuro: #06393a;
+  --verde-medio: #0c5254;
+  --verde-claro: #e8f6f0;
 }
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 70px;     /* evita que la navbar fija tape los títulos */
+  scroll-padding-top: 70px; /* para que la barra de arriba no tape los titulos */
 }
 
 body {
-  padding-top: 56px;            /* alto de la navbar fija */
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  padding-top: 56px;
 }
 
-/* ---------- Portada ---------- */
+/* ----- colores ----- */
+.bg-itsco { background-color: var(--verde) !important; }
+.bg-itsco-oscuro { background-color: var(--verde-oscuro) !important; }
+.text-itsco { color: var(--verde) !important; }
+.border-itsco { border-color: var(--verde) !important; }
+.bg-light { background-color: var(--verde-claro) !important; }
+
+/* ----- enlaces: texto subrayado, sin efectos ----- */
+a {
+  color: var(--verde-medio);
+}
+.navbar .nav-link {
+  color: #e8f6f0 !important;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+.navbar .nav-link:hover {
+  color: #ffffff !important;
+}
+.navbar-brand {
+  text-decoration: none;
+}
+
+/* ----- botones: planos y grises ----- */
+.btn {
+  background-color: #f3f3f3 !important;
+  color: #222 !important;
+  border: 1px solid #aaa !important;
+  border-radius: 3px !important;
+  font-weight: normal !important;
+  box-shadow: none !important;
+}
+.btn:hover {
+  background-color: #e2e2e2 !important;
+}
+.btn-lg {
+  font-size: 1rem;
+  padding: 6px 14px;
+}
+.texto-rojo { color: #b00020 !important; }
+.texto-verde { color: #116b3a !important; }
+
+/* ----- portada ----- */
 .hero {
   min-height: 80vh;
-  background:
-    radial-gradient(circle at 80% 20%, rgba(31, 196, 124, .25), transparent 45%),
-    linear-gradient(135deg, var(--color-oscuro) 0%, var(--color-medio) 100%);
+  background: linear-gradient(135deg, var(--verde-oscuro), var(--verde-medio));
 }
 
-/* ---------- Títulos de sección ---------- */
+/* ----- titulos de seccion ----- */
 .titulo-seccion {
-  font-weight: 700;
-  margin-bottom: 1.5rem;
-  padding-left: .75rem;
-  border-left: 5px solid var(--color-principal);
+  font-weight: bold;
+  margin-bottom: 20px;
+  padding-left: 10px;
+  border-left: 5px solid var(--verde);
 }
 
-/* ---------- Acerca de ---------- */
+/* ----- acerca de ----- */
 .dato {
-  background: var(--color-oscuro);
-  color: #fff;
+  background-color: var(--verde-oscuro);
+  color: white;
 }
-.dato span { color: var(--color-principal); }
+.dato span {
+  color: var(--verde);
+}
 
-/* ---------- Catálogo ---------- */
+/* ----- tarjetas ----- */
+.card {
+  border-radius: 3px;
+}
 .tarjeta-servicio {
-  transition: transform .2s ease, box-shadow .2s ease;
-  border-top: 4px solid var(--color-principal);
+  border-top: 4px solid var(--verde);
 }
-.tarjeta-servicio:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
-}
-.tarjeta-servicio .icono {
-  font-size: 2.2rem;
-  color: var(--color-principal);
-}
-
-/* ---------- Tarjetas de resumen por estado ---------- */
 .resumen-estado {
   border-left: 4px solid;
 }
 
-/* ---------- Tablas ---------- */
-.table td, .table th { white-space: nowrap; }
-.select-estado { min-width: 140px; }
+/* ----- tablas ----- */
+.table-itsco th {
+  background-color: var(--verde-oscuro);
+  color: white;
+}
+.table td, .table th {
+  white-space: nowrap;
+}
+.select-estado {
+  min-width: 140px;
+}
 
-/* Fila resaltada cuando el admin está editando */
-.fila-editando { outline: 2px solid var(--color-principal); }
+/* ----- formulario ----- */
+.form-check-input:checked {
+  background-color: var(--verde);
+  border-color: var(--verde);
+}
 
-/* ---------- Responsive ---------- */
+/* ----- celular ----- */
 @media (max-width: 576px) {
   .hero { min-height: auto; }
   .display-5 { font-size: 2rem; }
-}
-
-/* Evita que los enlaces del menú se partan en dos líneas */
-.navbar .nav-link { white-space: nowrap; }
-
-/* Botón de confirmación de SweetAlert2 con el color institucional
-   (los botones de eliminar mantienen el rojo definido en script.js) */
-.swal2-styled.swal2-confirm { background-color: var(--color-principal); }
-
-/* ==========================================================
-   Estilo sencillo (inspirado en Craigslist):
-   enlaces subrayados, botones planos grises, sin sombras
-   ========================================================== */
-
-/* Enlaces de texto: subrayados, sin efectos */
-a { color: var(--color-medio); text-decoration: underline; }
-a:hover { color: var(--color-oscuro); }
-.navbar .nav-link { color: #e8f6f0 !important; text-decoration: underline; padding: .25rem .5rem; }
-.navbar .nav-link:hover { color: #fff !important; }
-.navbar-brand { text-decoration: none; }
-
-/* Todos los botones: planos, gris claro, borde fino, esquinas poco redondeadas */
-.btn[class*="btn-"] {
-  --bs-btn-color: #222;
-  --bs-btn-bg: #f3f3f3;
-  --bs-btn-border-color: #aaa;
-  --bs-btn-hover-color: #000;
-  --bs-btn-hover-bg: #e2e2e2;
-  --bs-btn-hover-border-color: #888;
-  --bs-btn-active-color: #000;
-  --bs-btn-active-bg: #d6d6d6;
-  --bs-btn-active-border-color: #888;
-  --bs-btn-font-weight: 400;
-  --bs-btn-border-radius: 3px;
-  --bs-btn-box-shadow: none;
-  --bs-btn-focus-box-shadow: 0 0 0 2px #bbb;
-}
-.btn-lg { --bs-btn-padding-y: .375rem; --bs-btn-padding-x: .9rem; --bs-btn-font-size: 1rem; }
-.fw-semibold.btn { font-weight: 400 !important; }
-
-/* Acciones peligrosas o de activación: solo cambia el color del texto */
-.btn[class*="danger"]  { --bs-btn-color: #b00020; --bs-btn-hover-color: #b00020; }
-.btn[class*="success"] { --bs-btn-color: #116b3a; --bs-btn-hover-color: #116b3a; }
-.btn[class*="primary"] { --bs-btn-color: #0b4fa3; --bs-btn-hover-color: #0b4fa3; }
-
-/* Tarjetas y tablas sin sombras ni animación */
-.shadow, .shadow-sm { box-shadow: none !important; }
-.card { border-radius: 3px; }
-.tarjeta-servicio, .tarjeta-servicio:hover { transform: none; box-shadow: none; }
-
-/* Botones de SweetAlert2 con el mismo estilo plano */
-.swal2-styled.swal2-confirm, .swal2-styled.swal2-cancel {
-  background: #f3f3f3 !important; color: #222 !important;
-  border: 1px solid #aaa !important; border-radius: 3px !important; box-shadow: none !important;
 }

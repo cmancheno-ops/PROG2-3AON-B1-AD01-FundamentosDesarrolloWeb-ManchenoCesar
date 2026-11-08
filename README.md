@@ -33,7 +33,7 @@ Frontend de un sistema web para un taller de mantenimiento automotriz, hecho con
 
 | Módulo | Qué incluye |
 |---|---|
-| 1. Página institucional | Inicio, Acerca de, catálogo de servicios (generado con `map()` desde un diccionario), Contacto, navegación funcional y diseño responsive. |
+| 1. Página institucional | Inicio, Acerca de, catálogo de servicios (generado con `for...in` desde un diccionario), Contacto, navegación funcional y diseño responsive. |
 | 2. Solicitud de mantenimiento | Formulario con datos del cliente y del vehículo (placa, marca, modelo, año, kilometraje), servicio, fecha y hora. Usa inputs `text`, `number`, `email`, `date`, `select`, `radio`, `checkbox` y `textarea`. Cada solicitud se guarda como objeto en el array `solicitudes`. |
 | 3. Login, roles y CRUD | Login con 4 usuarios y 2 roles. El cliente ve su perfil, registra solicitudes y consulta solo las suyas. El administrador además edita, elimina, cambia estados, filtra todas las solicitudes, registra para otro cliente y habilita/deshabilita cuentas. |
 
@@ -53,7 +53,7 @@ Frontend de un sistema web para un taller de mantenimiento automotriz, hecho con
 }
 ```
 
-- Métodos y ciclos usados: `for`, `for...of`, `for...in`, `forEach()`, `find()`, `filter()`, `map()`, `some()`, `includes()`, `Object.keys/values/entries()`.
+- Métodos y ciclos usados: `for`, `for...of`, `for...in`, `forEach()`, `find()`, `filter()`, `map()`, `some()`, `includes()`, `Object.values()`.
 
 ## Validaciones
 
@@ -73,7 +73,7 @@ Frontend de un sistema web para un taller de mantenimiento automotriz, hecho con
 ## Control por rol
 
 - El enlace **Administración** es visible para todos, pero JavaScript verifica el rol antes de mostrarla (clic, escribir `#admin` en la URL).
-- Todas las funciones administrativas (`cambiarEstado`, `editarSolicitud`, `eliminarSolicitud`, `alternarCuenta`) empiezan llamando a `exigirAdmin()`, por lo que tampoco funcionan si un cliente las ejecuta desde la consola del navegador.
+- Todas las funciones administrativas (`cambiarEstado`, `editarSolicitud`, `eliminarSolicitud`, `cambiarCuenta`) empiezan llamando a `exigirAdmin()`, por lo que tampoco funcionan si un cliente las ejecuta desde la consola del navegador.
 - La vista “Mis mantenimientos” usa `filter()` por `usuarioId`, así el cliente solo ve sus registros.
 - Al eliminar se pide confirmación con SweetAlert2.
 

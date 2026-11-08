@@ -1,295 +1,307 @@
-/* ==========================================================================
-   MotorPro - Portal de mantenimiento automotriz
-   Programación II - AD01 Fundamentos de desarrollo web
-   Autor: César Mancheno
+// AD01 - Programacion II
+// Portal de mantenimiento automotriz "MotorPro"
+// Estudiante: Cesar Mancheno - 3AON
 
-   Contenido del archivo:
-     1. Datos base (diccionarios y arrays de objetos)
-     2. Persistencia en localStorage / sessionStorage
-     3. Utilidades
-     4. Módulo 1 - Catálogo de servicios
-     5. Login, sesión y control de roles
-     6. Módulo 2 - Formulario y validaciones
-     7. Módulo 3 - Vistas del cliente (perfil y mis mantenimientos)
-     8. Módulo 3 - Administración (CRUD, estados y cuentas)
-     9. Eventos e inicialización
-   ========================================================================== */
+// ======================= DATOS =======================
 
-/* --------------------------------------------------------------------------
-   1. DATOS BASE
-   -------------------------------------------------------------------------- */
-
-// Diccionario de servicios: la clave es el código y el valor un objeto con sus datos.
+// diccionario de servicios (codigo -> datos)
 const SERVICIOS = {
-  "aceite":      { nombre: "Cambio de aceite y filtros", precio: 45,  duracion: "1 h",   icono: "bi-droplet-half" },
-  "frenos":      { nombre: "Revisión de frenos",         precio: 60,  duracion: "2 h",   icono: "bi-disc" },
-  "afinamiento": { nombre: "Afinamiento de motor",       precio: 90,  duracion: "3 h",   icono: "bi-gear" },
-  "alineacion":  { nombre: "Alineación y balanceo",      precio: 35,  duracion: "1 h",   icono: "bi-bullseye" },
-  "electrico":   { nombre: "Diagnóstico eléctrico",      precio: 40,  duracion: "1.5 h", icono: "bi-lightning-charge" },
-  "preventivo":  { nombre: "Mantenimiento preventivo por kilometraje", precio: 120, duracion: "4 h", icono: "bi-speedometer2" }
+  aceite: { nombre: "Cambio de aceite y filtros", precio: 45, duracion: "1 h" },
+  frenos: { nombre: "Revisión de frenos", precio: 60, duracion: "2 h" },
+  afinamiento: { nombre: "Afinamiento de motor", precio: 90, duracion: "3 h" },
+  alineacion: { nombre: "Alineación y balanceo", precio: 35, duracion: "1 h" },
+  electrico: { nombre: "Diagnóstico eléctrico", precio: 40, duracion: "1.5 h" },
+  preventivo: { nombre: "Mantenimiento preventivo por kilometraje", precio: 120, duracion: "4 h" }
 };
 
-// Diccionario de estados: estado -> color de Bootstrap para el badge.
+// diccionario de estados (estado -> color del badge de bootstrap)
 const ESTADOS = {
-  "Pendiente":   "secondary",
+  "Pendiente": "secondary",
   "En revisión": "info",
-  "En proceso":  "primary",
-  "Finalizado":  "success",
-  "Cancelado":   "danger"
+  "En proceso": "primary",
+  "Finalizado": "success",
+  "Cancelado": "danger"
 };
 
-const MARCAS = ["Chevrolet", "Kia", "Hyundai", "Toyota", "Nissan", "Mazda", "Renault", "Ford", "Volkswagen", "Great Wall", "Otra"];
-
+const MARCAS = ["Chevrolet", "Kia", "Hyundai", "Toyota", "Nissan", "Mazda", "Renault", "Ford", "Volkswagen", "Otra"];
 const ADICIONALES = ["Lavado exterior", "Revisión de llantas", "Recarga de aire acondicionado", "Revisión de luces"];
+const HORAS = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"];
 
-// Horario de atención: lunes a viernes 08:00-17:00 (último turno 16:00), sábado 08:00-12:00 (último turno 11:00).
-const HORAS_DISPONIBLES = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"];
-const ULTIMA_HORA_SABADO = "11:00";
-
-// Usuarios de prueba (tres o más usuarios y dos roles).
-// NOTA: guardar contraseñas en el frontend NO es seguro; se hace solo porque la práctica no tiene backend.
-const USUARIOS_INICIALES = [
-  { id: 1, usuario: "admin",    clave: "Admin2026*",   rol: "Administrador", nombre: "Diego Andrade",  telefono: "0991112233", email: "admin@motorpro.ec",    activo: true },
-  { id: 2, usuario: "mlopez",   clave: "Cliente2026*", rol: "Cliente",       nombre: "María López",    telefono: "0987654321", email: "maria.lopez@mail.com", activo: true },
-  { id: 3, usuario: "jvera",    clave: "Cliente2026*", rol: "Cliente",       nombre: "Jorge Vera",     telefono: "0976543210", email: "jorge.vera@mail.com",  activo: true },
-  { id: 4, usuario: "atorres",  clave: "Cliente2026*", rol: "Cliente",       nombre: "Ana Torres",     telefono: "0965432109", email: "ana.torres@mail.com",  activo: false } // cuenta deshabilitada
+// usuarios de prueba
+// OJO: las claves estan en el codigo solo porque la practica no tiene backend.
+// En un sistema real esto no se debe hacer (las claves van cifradas en el servidor).
+const USUARIOS_PRUEBA = [
+  { id: 1, usuario: "admin", clave: "Admin2026*", rol: "Administrador", nombre: "Diego Andrade", telefono: "0991112233", email: "admin@motorpro.ec", activo: true },
+  { id: 2, usuario: "mlopez", clave: "Cliente2026*", rol: "Cliente", nombre: "María López", telefono: "0987654321", email: "maria.lopez@mail.com", activo: true },
+  { id: 3, usuario: "jvera", clave: "Cliente2026*", rol: "Cliente", nombre: "Jorge Vera", telefono: "0976543210", email: "jorge.vera@mail.com", activo: true },
+  { id: 4, usuario: "atorres", clave: "Cliente2026*", rol: "Cliente", nombre: "Ana Torres", telefono: "0965432109", email: "ana.torres@mail.com", activo: false }
 ];
 
-// Solicitudes de ejemplo para que los listados no aparezcan vacíos.
-const SOLICITUDES_INICIALES = [
+// solicitudes de ejemplo
+const SOLICITUDES_PRUEBA = [
   {
     id: "SOL-0001", usuarioId: 2,
-    cliente:  { nombre: "María López", telefono: "0987654321", email: "maria.lopez@mail.com" },
+    cliente: { nombre: "María López", telefono: "0987654321", email: "maria.lopez@mail.com" },
     vehiculo: { placa: "PBA-1234", marca: "Kia", modelo: "Rio", anio: 2019, kilometraje: 45000, combustible: "Gasolina" },
     servicio: "aceite", adicionales: ["Lavado exterior"], fecha: "2026-11-03", hora: "09:00",
-    observaciones: "Cambio de aceite sintético.", estado: "Finalizado", creadoEn: "2026-10-28T10:15:00"
+    observaciones: "Cambio de aceite sintético.", estado: "Finalizado"
   },
   {
     id: "SOL-0002", usuarioId: 2,
-    cliente:  { nombre: "María López", telefono: "0987654321", email: "maria.lopez@mail.com" },
+    cliente: { nombre: "María López", telefono: "0987654321", email: "maria.lopez@mail.com" },
     vehiculo: { placa: "PBA-1234", marca: "Kia", modelo: "Rio", anio: 2019, kilometraje: 46200, combustible: "Gasolina" },
     servicio: "frenos", adicionales: [], fecha: "2026-11-20", hora: "10:00",
-    observaciones: "Chirrido al frenar.", estado: "Pendiente", creadoEn: "2026-11-05T18:40:00"
+    observaciones: "Chirrido al frenar.", estado: "Pendiente"
   },
   {
     id: "SOL-0003", usuarioId: 3,
-    cliente:  { nombre: "Jorge Vera", telefono: "0976543210", email: "jorge.vera@mail.com" },
+    cliente: { nombre: "Jorge Vera", telefono: "0976543210", email: "jorge.vera@mail.com" },
     vehiculo: { placa: "GSD-987", marca: "Toyota", modelo: "Hilux", anio: 2015, kilometraje: 182000, combustible: "Diésel" },
-    servicio: "preventivo", adicionales: ["Revisión de llantas", "Revisión de luces"], fecha: "2026-11-18", hora: "08:00",
-    observaciones: "", estado: "En revisión", creadoEn: "2026-11-06T09:05:00"
+    servicio: "preventivo", adicionales: ["Revisión de llantas"], fecha: "2026-11-18", hora: "08:00",
+    observaciones: "", estado: "En revisión"
   }
 ];
 
-// Arrays de trabajo (se cargan desde localStorage en inicializar()).
+// arrays con los que trabaja la aplicacion
 let usuarios = [];
 let solicitudes = [];
-let usuarioActual = null;   // objeto del usuario con sesión iniciada
+let usuarioActual = null; // usuario que inicio sesion
 
-/* --------------------------------------------------------------------------
-   2. PERSISTENCIA
-   -------------------------------------------------------------------------- */
 
-const CLAVE_SOLICITUDES = "motorpro_solicitudes";
-const CLAVE_USUARIOS    = "motorpro_usuarios";
-const CLAVE_SESION      = "motorpro_sesion";
+// ======================= LOCALSTORAGE =======================
 
 function cargarDatos() {
-  // JSON.parse convierte el texto guardado de vuelta en arrays de objetos.
-  // structuredClone evita modificar las constantes iniciales.
-  solicitudes = JSON.parse(localStorage.getItem(CLAVE_SOLICITUDES)) || structuredClone(SOLICITUDES_INICIALES);
-  usuarios    = JSON.parse(localStorage.getItem(CLAVE_USUARIOS))    || structuredClone(USUARIOS_INICIALES);
+  let datosSolicitudes = localStorage.getItem("solicitudes");
+  let datosUsuarios = localStorage.getItem("usuarios");
+
+  if (datosSolicitudes) {
+    solicitudes = JSON.parse(datosSolicitudes);
+  } else {
+    // copia de los datos de prueba para no modificar los originales
+    solicitudes = JSON.parse(JSON.stringify(SOLICITUDES_PRUEBA));
+  }
+
+  if (datosUsuarios) {
+    usuarios = JSON.parse(datosUsuarios);
+  } else {
+    usuarios = JSON.parse(JSON.stringify(USUARIOS_PRUEBA));
+  }
   guardarDatos();
 }
 
 function guardarDatos() {
-  localStorage.setItem(CLAVE_SOLICITUDES, JSON.stringify(solicitudes));
-  localStorage.setItem(CLAVE_USUARIOS, JSON.stringify(usuarios));
+  localStorage.setItem("solicitudes", JSON.stringify(solicitudes));
+  localStorage.setItem("usuarios", JSON.stringify(usuarios));
 }
 
-/* --------------------------------------------------------------------------
-   3. UTILIDADES
-   -------------------------------------------------------------------------- */
 
-const $ = (id) => document.getElementById(id);
+// ======================= FUNCIONES DE APOYO =======================
 
-// Escapa caracteres HTML para evitar inyección de código (XSS) al usar innerHTML.
+// evita que se ejecute codigo HTML/JS que el usuario escriba en el formulario (XSS)
 function escaparHTML(texto) {
-  return String(texto ?? "")
-    .replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;").replaceAll("'", "&#39;");
+  return String(texto)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
-// Fecha local en formato AAAA-MM-DD (input type="date" usa este formato).
-function fechaLocalISO(fecha = new Date()) {
-  const a = fecha.getFullYear();
-  const m = String(fecha.getMonth() + 1).padStart(2, "0");
-  const d = String(fecha.getDate()).padStart(2, "0");
-  return `${a}-${m}-${d}`;
+// devuelve la fecha en formato 2026-11-08 (el mismo que usa el input date)
+function fechaTexto(fecha) {
+  let anio = fecha.getFullYear();
+  let mes = String(fecha.getMonth() + 1).padStart(2, "0");
+  let dia = String(fecha.getDate()).padStart(2, "0");
+  return anio + "-" + mes + "-" + dia;
 }
 
-function formatearFecha(iso) {
-  const [a, m, d] = iso.split("-");
-  return `${d}/${m}/${a}`;
+// 2026-11-08 -> 08/11/2026
+function mostrarFecha(fecha) {
+  let partes = fecha.split("-");
+  return partes[2] + "/" + partes[1] + "/" + partes[0];
 }
 
 function badgeEstado(estado) {
-  return `<span class="badge bg-${ESTADOS[estado] || "secondary"}">${escaparHTML(estado)}</span>`;
+  return '<span class="badge bg-' + ESTADOS[estado] + '">' + estado + '</span>';
 }
 
-// Genera el siguiente ID con formato SOL-0001 a partir del número mayor existente.
+// genera el siguiente id: SOL-0001, SOL-0002, ...
 function generarId() {
   let mayor = 0;
-  for (const s of solicitudes) {
-    const numero = parseInt(s.id.split("-")[1], 10);
-    if (numero > mayor) mayor = numero;
+  for (let s of solicitudes) {
+    let numero = parseInt(s.id.replace("SOL-", ""));
+    if (numero > mayor) {
+      mayor = numero;
+    }
   }
   return "SOL-" + String(mayor + 1).padStart(4, "0");
 }
 
-const esAdmin = () => usuarioActual !== null && usuarioActual.rol === "Administrador";
-
-function toast(icono, titulo) {
-  Swal.fire({ toast: true, position: "top-end", icon: icono, title: titulo, showConfirmButton: false, timer: 2200, timerProgressBar: true });
+function esAdmin() {
+  return usuarioActual != null && usuarioActual.rol == "Administrador";
 }
 
-/* --------------------------------------------------------------------------
-   4. MÓDULO 1 - CATÁLOGO DE SERVICIOS
-   -------------------------------------------------------------------------- */
-
-function renderizarCatalogo() {
-  // Object.entries convierte el diccionario en pares [codigo, servicio]; map() genera el HTML de cada tarjeta.
-  $("catalogoServicios").innerHTML = Object.entries(SERVICIOS).map(([codigo, s]) => `
-    <div class="col-sm-6 col-lg-4">
-      <article class="card h-100 tarjeta-servicio">
-        <div class="card-body">
-          <i class="bi ${s.icono} icono"></i>
-          <h3 class="h5 card-title mt-2">${s.nombre}</h3>
-          <p class="card-text text-muted mb-1"><i class="bi bi-clock"></i> Duración aprox.: ${s.duracion}</p>
-          <p class="card-text fw-bold">Desde $${s.precio.toFixed(2)}</p>
-        </div>
-        <div class="card-footer bg-transparent border-0">
-          <button class="btn btn-outline-itsco btn-sm btn-agendar" data-servicio="${codigo}">Agendar este servicio</button>
-        </div>
-      </article>
-    </div>`).join("");
+function mensajeCorto(icono, texto) {
+  Swal.fire({ toast: true, position: "top-end", icon: icono, title: texto, showConfirmButton: false, timer: 2000 });
 }
 
-// Llena los select, radios y checkboxes del formulario a partir de los datos base.
-function llenarOpcionesFormulario() {
-  MARCAS.forEach(m => $("marca").insertAdjacentHTML("beforeend", `<option value="${m}">${m}</option>`));
 
-  for (const codigo in SERVICIOS) {
-    $("servicio").insertAdjacentHTML("beforeend", `<option value="${codigo}">${SERVICIOS[codigo].nombre}</option>`);
+// ======================= MODULO 1: CATALOGO =======================
+
+function mostrarCatalogo() {
+  let html = "";
+  for (let codigo in SERVICIOS) {
+    let s = SERVICIOS[codigo];
+    html += `
+      <div class="col-sm-6 col-lg-4">
+        <div class="card h-100 tarjeta-servicio">
+          <div class="card-body">
+            <h3 class="h5">${s.nombre}</h3>
+            <p class="text-muted mb-1">Duración aprox.: ${s.duracion}</p>
+            <p class="fw-bold">Desde $${s.precio.toFixed(2)}</p>
+            <button class="btn btn-sm btn-agendar" data-servicio="${codigo}">Agendar este servicio</button>
+          </div>
+        </div>
+      </div>`;
+  }
+  document.getElementById("catalogoServicios").innerHTML = html;
+}
+
+// llena los select, radios y checkbox del formulario
+function llenarFormulario() {
+  let marca = document.getElementById("marca");
+  MARCAS.forEach(function (m) {
+    marca.innerHTML += `<option value="${m}">${m}</option>`;
+  });
+
+  let servicio = document.getElementById("servicio");
+  for (let codigo in SERVICIOS) {
+    servicio.innerHTML += `<option value="${codigo}">${SERVICIOS[codigo].nombre}</option>`;
   }
 
-  for (let i = 0; i < HORAS_DISPONIBLES.length; i++) {
-    $("hora").insertAdjacentHTML("beforeend", `<option value="${HORAS_DISPONIBLES[i]}">${HORAS_DISPONIBLES[i]}</option>`);
+  let hora = document.getElementById("hora");
+  for (let i = 0; i < HORAS.length; i++) {
+    hora.innerHTML += `<option value="${HORAS[i]}">${HORAS[i]}</option>`;
   }
 
-  $("grupoAdicionales").innerHTML = ADICIONALES.map((a, i) => `
-    <div class="form-check form-check-inline">
-      <input class="form-check-input" type="checkbox" name="adicionales" id="adic${i}" value="${a}">
-      <label class="form-check-label" for="adic${i}">${a}</label>
-    </div>`).join("");
+  let checks = "";
+  for (let i = 0; i < ADICIONALES.length; i++) {
+    checks += `
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="checkbox" name="adicionales" id="adic${i}" value="${ADICIONALES[i]}">
+        <label class="form-check-label" for="adic${i}">${ADICIONALES[i]}</label>
+      </div>`;
+  }
+  document.getElementById("grupoAdicionales").innerHTML = checks;
 
-  Object.keys(ESTADOS).forEach(e => $("filtroEstado").insertAdjacentHTML("beforeend", `<option value="${e}">${e}</option>`));
+  let filtroEstado = document.getElementById("filtroEstado");
+  for (let estado in ESTADOS) {
+    filtroEstado.innerHTML += `<option value="${estado}">${estado}</option>`;
+  }
 
-  // Restricciones de los inputs: fecha mínima hoy y año máximo el siguiente.
-  $("fecha").min = fechaLocalISO();
-  $("anio").max = new Date().getFullYear() + 1;
+  document.getElementById("fecha").min = fechaTexto(new Date());
+  document.getElementById("anio").max = new Date().getFullYear() + 1;
 }
 
-/* --------------------------------------------------------------------------
-   5. LOGIN, SESIÓN Y CONTROL DE ROLES
-   -------------------------------------------------------------------------- */
 
-function iniciarSesion(evento) {
-  evento.preventDefault();
-  const nombreUsuario = $("loginUsuario").value.trim().toLowerCase();
-  const clave = $("loginClave").value;
+// ======================= LOGIN Y ROLES =======================
 
-  // Validación de credenciales
-  if (nombreUsuario === "" || clave === "") {
+function iniciarSesion(e) {
+  e.preventDefault();
+  let usuarioIngresado = document.getElementById("loginUsuario").value.trim().toLowerCase();
+  let claveIngresada = document.getElementById("loginClave").value;
+
+  if (usuarioIngresado == "" || claveIngresada == "") {
     Swal.fire("Datos incompletos", "Ingrese usuario y contraseña.", "warning");
     return;
   }
 
-  const usuario = usuarios.find(u => u.usuario === nombreUsuario);
+  let usuario = usuarios.find(function (u) {
+    return u.usuario == usuarioIngresado;
+  });
 
-  // Se usa el mismo mensaje para usuario inexistente y clave incorrecta
-  // para no revelar qué usuarios existen (buena práctica de seguridad).
-  if (!usuario || usuario.clave !== clave) {
+  // mismo mensaje si no existe o si la clave esta mal, asi no se sabe que usuarios existen
+  if (usuario == undefined || usuario.clave != claveIngresada) {
     Swal.fire("Acceso inválido", "Usuario o contraseña incorrectos.", "error");
-    $("loginClave").value = "";
+    document.getElementById("loginClave").value = "";
     return;
   }
 
-  if (!usuario.activo) {
+  if (usuario.activo == false) {
     Swal.fire("Cuenta deshabilitada", "Su cuenta está deshabilitada. Comuníquese con el taller.", "error");
     return;
   }
 
   usuarioActual = usuario;
-  sessionStorage.setItem(CLAVE_SESION, usuario.id);
-  bootstrap.Modal.getOrCreateInstance($("modalLogin")).hide();
-  $("formLogin").reset();
-  actualizarInterfaz();
-  Swal.fire({ icon: "success", title: `Bienvenido/a, ${usuario.nombre}`, text: `Rol: ${usuario.rol}`, timer: 1800, showConfirmButton: false });
+  sessionStorage.setItem("sesion", usuario.id);
+  bootstrap.Modal.getOrCreateInstance(document.getElementById("modalLogin")).hide();
+  document.getElementById("formLogin").reset();
+  actualizarPantalla();
+  Swal.fire({ icon: "success", title: "Bienvenido/a, " + usuario.nombre, text: "Rol: " + usuario.rol, timer: 1800, showConfirmButton: false });
   location.hash = "#perfil";
 }
 
 function cerrarSesion() {
   Swal.fire({
-    title: "¿Cerrar sesión?", icon: "question", showCancelButton: true,
-    confirmButtonText: "Sí, salir", cancelButtonText: "Cancelar"
-  }).then(r => {
-    if (!r.isConfirmed) return;
-    usuarioActual = null;
-    sessionStorage.removeItem(CLAVE_SESION);
-    limpiarFormulario();
-    actualizarInterfaz();
-    location.hash = "#inicio";
-    toast("info", "Sesión cerrada");
+    title: "¿Cerrar sesión?", icon: "question",
+    showCancelButton: true, confirmButtonText: "Sí, salir", cancelButtonText: "Cancelar"
+  }).then(function (respuesta) {
+    if (respuesta.isConfirmed) {
+      usuarioActual = null;
+      sessionStorage.removeItem("sesion");
+      limpiarFormulario();
+      actualizarPantalla();
+      location.hash = "#inicio";
+    }
   });
 }
 
-function restaurarSesion() {
-  const id = Number(sessionStorage.getItem(CLAVE_SESION));
-  const usuario = usuarios.find(u => u.id === id);
-  // Si la cuenta fue deshabilitada mientras tanto, no se restaura la sesión.
-  usuarioActual = (usuario && usuario.activo) ? usuario : null;
+// si se recarga la pagina se mantiene la sesion (mientras no se cierre la pestaña)
+function recuperarSesion() {
+  let id = Number(sessionStorage.getItem("sesion"));
+  let usuario = usuarios.find(function (u) {
+    return u.id == id;
+  });
+  if (usuario && usuario.activo) {
+    usuarioActual = usuario;
+  }
 }
 
-// Muestra u oculta elementos según haya sesión y según el rol.
-function actualizarInterfaz() {
-  const haySesion = usuarioActual !== null;
+// muestra u oculta las secciones segun el rol
+function actualizarPantalla() {
+  let haySesion = usuarioActual != null;
 
-  document.querySelectorAll(".solo-sesion").forEach(el => el.classList.toggle("d-none", !haySesion));
-  document.querySelectorAll(".sin-sesion").forEach(el => el.classList.toggle("d-none", haySesion));
-  document.querySelectorAll(".solo-admin").forEach(el => el.classList.toggle("d-none", !esAdmin()));
+  document.querySelectorAll(".solo-sesion").forEach(function (el) {
+    el.classList.toggle("d-none", !haySesion);
+  });
+  document.querySelectorAll(".sin-sesion").forEach(function (el) {
+    el.classList.toggle("d-none", haySesion);
+  });
+  document.querySelectorAll(".solo-admin").forEach(function (el) {
+    el.classList.toggle("d-none", !esAdmin());
+  });
 
-  // Secciones privadas: perfil, solicitud y mis mantenimientos para cualquier rol; admin solo para Administrador.
-  ["perfil", "solicitud", "mis-mantenimientos"].forEach(id => $(id).classList.toggle("d-none", !haySesion));
-  $("admin").classList.toggle("d-none", !esAdmin());
+  document.getElementById("perfil").classList.toggle("d-none", !haySesion);
+  document.getElementById("solicitud").classList.toggle("d-none", !haySesion);
+  document.getElementById("mis-mantenimientos").classList.toggle("d-none", !haySesion);
+  document.getElementById("admin").classList.toggle("d-none", !esAdmin());
 
   if (haySesion) {
-    $("usuarioNavbar").textContent = usuarioActual.nombre;
-    $("usuarioNavbar").title = usuarioActual.rol;
-    renderizarPerfil();
-    renderizarMisSolicitudes();
-    prepararFormularioNuevo();
-  }
-  if (esAdmin()) {
-    llenarSelectClientes();
-    renderizarAdmin();
+    document.getElementById("usuarioNavbar").textContent = usuarioActual.nombre;
+    mostrarPerfil();
+    mostrarMisSolicitudes();
+    if (esAdmin()) {
+      llenarClientes();
+      mostrarAdmin();
+    }
+    ponerDatosContacto();
   }
 }
 
-// Control de acceso a la sección de administración (prueba 5).
+// control de acceso a la seccion de administracion
 function verificarAccesoAdmin() {
-  if (usuarioActual === null) {
-    Swal.fire("Inicie sesión", "Debe iniciar sesión como Administrador para acceder.", "info")
-      .then(() => bootstrap.Modal.getOrCreateInstance($("modalLogin")).show());
+  if (usuarioActual == null) {
+    Swal.fire("Inicie sesión", "Debe iniciar sesión como Administrador.", "info");
     return false;
   }
   if (!esAdmin()) {
@@ -299,8 +311,8 @@ function verificarAccesoAdmin() {
   return true;
 }
 
-// Cualquier operación administrativa llama a esta función antes de ejecutarse,
-// así no se puede ejecutar desde la interfaz de cliente aunque se invoque desde la consola.
+// todas las funciones del admin llaman a esta funcion primero,
+// asi un cliente no puede usarlas ni desde la consola del navegador
 function exigirAdmin() {
   if (!esAdmin()) {
     Swal.fire("Acceso denegado", "Operación permitida solo para el Administrador.", "error");
@@ -309,566 +321,625 @@ function exigirAdmin() {
   return true;
 }
 
-/* --------------------------------------------------------------------------
-   6. MÓDULO 2 - FORMULARIO Y VALIDACIONES
-   -------------------------------------------------------------------------- */
 
-// Expresiones regulares de validación
-const REGEX = {
-  placa:    /^[A-Z]{3}-\d{3,4}$/,          // Ecuador: ABC-123 o ABC-1234
-  telefono: /^(09\d{8}|0[2-7]\d{7})$/,     // celular 09XXXXXXXX o fijo 0X XXXXXXX
-  email:    /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/,
-  nombre:   /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü ]{3,60}$/
-};
+// ======================= MODULO 2: FORMULARIO =======================
 
-// Lee el formulario y devuelve un objeto con los datos.
+// expresiones regulares
+const regexPlaca = /^[A-Z]{3}-\d{3,4}$/;            // ABC-123 o ABC-1234
+const regexTelefono = /^(09\d{8}|0[2-7]\d{7})$/;    // celular 09xxxxxxxx o fijo 02xxxxxxx
+const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const regexNombre = /^[A-Za-zÁÉÍÓÚáéíóúÑñ ]{3,60}$/;
+
 function leerFormulario() {
-  const combustible = document.querySelector('input[name="combustible"]:checked');
-  // Array.from + filter + map: obtiene los valores de los checkbox marcados.
-  const adicionales = Array.from(document.querySelectorAll('input[name="adicionales"]'))
-    .filter(chk => chk.checked)
-    .map(chk => chk.value);
+  let combustible = document.querySelector('input[name="combustible"]:checked');
+
+  // checkbox marcados -> array con sus valores
+  let marcados = document.querySelectorAll('input[name="adicionales"]:checked');
+  let adicionales = Array.from(marcados).map(function (chk) {
+    return chk.value;
+  });
 
   return {
-    nombre: $("nombre").value.trim(),
-    telefono: $("telefono").value.trim(),
-    email: $("email").value.trim().toLowerCase(),
-    placa: $("placa").value.trim().toUpperCase(),
-    marca: $("marca").value,
-    modelo: $("modelo").value.trim(),
-    anio: $("anio").value,
-    kilometraje: $("kilometraje").value,
+    nombre: document.getElementById("nombre").value.trim(),
+    telefono: document.getElementById("telefono").value.trim(),
+    email: document.getElementById("email").value.trim().toLowerCase(),
+    placa: document.getElementById("placa").value.trim().toUpperCase(),
+    marca: document.getElementById("marca").value,
+    modelo: document.getElementById("modelo").value.trim(),
+    anio: document.getElementById("anio").value,
+    kilometraje: document.getElementById("kilometraje").value,
     combustible: combustible ? combustible.value : "",
-    servicio: $("servicio").value,
-    adicionales,
-    fecha: $("fecha").value,
-    hora: $("hora").value,
-    observaciones: $("observaciones").value.trim(),
-    aceptaTerminos: $("aceptaTerminos").checked
+    servicio: document.getElementById("servicio").value,
+    adicionales: adicionales,
+    fecha: document.getElementById("fecha").value,
+    hora: document.getElementById("hora").value,
+    observaciones: document.getElementById("observaciones").value.trim(),
+    acepta: document.getElementById("aceptaTerminos").checked
   };
 }
 
-// Valida los datos y devuelve un diccionario { campo: mensaje } con los errores encontrados.
-function validarSolicitud(d, idEdicion) {
-  const errores = {};
-  const anioActual = new Date().getFullYear();
+// devuelve un objeto con los errores { campo: "mensaje" }
+function validarSolicitud(datos, idEdicion) {
+  let errores = {};
+  let anioActual = new Date().getFullYear();
+  let hoy = fechaTexto(new Date());
 
-  if (!REGEX.nombre.test(d.nombre)) errores.nombre = "Ingrese un nombre válido (solo letras, mínimo 3).";
-  if (!REGEX.telefono.test(d.telefono)) errores.telefono = "Teléfono inválido. Use 09XXXXXXXX (celular) o 02XXXXXXX (fijo).";
-  if (!REGEX.email.test(d.email)) errores.email = "Correo electrónico inválido.";
+  if (!regexNombre.test(datos.nombre)) errores.nombre = "Ingrese un nombre válido (solo letras).";
+  if (!regexTelefono.test(datos.telefono)) errores.telefono = "Teléfono inválido. Ej: 0991234567 o 022345678.";
+  if (!regexEmail.test(datos.email)) errores.email = "Correo electrónico inválido.";
+  if (!regexPlaca.test(datos.placa)) errores.placa = "Placa inválida. Ej: PBA-1234 o ABC-123.";
+  if (datos.marca == "") errores.marca = "Seleccione la marca.";
+  if (datos.modelo.length < 2) errores.modelo = "Ingrese el modelo.";
 
-  if (!REGEX.placa.test(d.placa)) errores.placa = "Formato de placa inválido. Ejemplo: PBA-1234 o ABC-123.";
-  if (d.marca === "") errores.marca = "Seleccione la marca.";
-  if (d.modelo.length < 2) errores.modelo = "Ingrese el modelo.";
-
-  const anio = Number(d.anio);
-  if (d.anio === "" || !Number.isInteger(anio) || anio < 1980 || anio > anioActual + 1) {
-    errores.anio = `El año debe estar entre 1980 y ${anioActual + 1}.`;
+  let anio = Number(datos.anio);
+  if (datos.anio == "" || !Number.isInteger(anio) || anio < 1980 || anio > anioActual + 1) {
+    errores.anio = "El año debe estar entre 1980 y " + (anioActual + 1) + ".";
   }
 
-  const km = Number(d.kilometraje);
-  if (d.kilometraje === "" || !Number.isInteger(km) || km < 0 || km > 999999) {
-    errores.kilometraje = "Kilometraje inválido (número entero entre 0 y 999999).";
+  let km = Number(datos.kilometraje);
+  if (datos.kilometraje == "" || !Number.isInteger(km) || km < 0 || km > 999999) {
+    errores.kilometraje = "Kilometraje inválido (entre 0 y 999999).";
   }
 
-  if (d.combustible === "") errores.combustible = "Seleccione el tipo de combustible.";
-  if (!(d.servicio in SERVICIOS)) errores.servicio = "Seleccione un servicio del catálogo.";
+  if (datos.combustible == "") errores.combustible = "Seleccione el tipo de combustible.";
+  if (SERVICIOS[datos.servicio] == undefined) errores.servicio = "Seleccione un servicio.";
 
-  // Validación de fecha: no pasada, no domingo, máximo 60 días de anticipación.
-  const solicitudOriginal = solicitudes.find(s => s.id === idEdicion);
-  const fechaSinCambios = solicitudOriginal && solicitudOriginal.fecha === d.fecha;
-  if (d.fecha === "") {
+  // si el admin edita y no cambia la fecha, no se valida otra vez (puede ser una fecha pasada)
+  let original = solicitudes.find(function (s) { return s.id == idEdicion; });
+  let mismaFecha = original != undefined && original.fecha == datos.fecha;
+
+  // dia de la semana: 0 = domingo, 6 = sabado
+  let dia = new Date(datos.fecha + "T00:00:00").getDay();
+  let limite = new Date();
+  limite.setDate(limite.getDate() + 60);
+
+  if (datos.fecha == "") {
     errores.fecha = "Seleccione la fecha.";
-  } else if (!fechaSinCambios) {
-    const hoy = fechaLocalISO();
-    const limite = new Date(); limite.setDate(limite.getDate() + 60);
-    const diaSemana = new Date(d.fecha + "T00:00:00").getDay(); // 0 = domingo, 6 = sábado
-    if (d.fecha < hoy) errores.fecha = "La fecha no puede ser anterior a hoy.";
-    else if (d.fecha > fechaLocalISO(limite)) errores.fecha = "Solo se agenda con máximo 60 días de anticipación.";
-    else if (diaSemana === 0) errores.fecha = "Los domingos el taller está cerrado.";
-  }
-
-  // Validación de horario
-  if (!HORAS_DISPONIBLES.includes(d.hora)) {
-    errores.hora = "Seleccione una hora de atención.";
-  } else if (d.fecha !== "" && !errores.fecha) {
-    const diaSemana = new Date(d.fecha + "T00:00:00").getDay();
-    if (diaSemana === 6 && d.hora > ULTIMA_HORA_SABADO) errores.hora = "Los sábados se atiende hasta las 12:00 (último turno 11:00).";
-    if (d.fecha === fechaLocalISO() && !fechaSinCambios) {
-      const ahora = new Date();
-      const horaActual = String(ahora.getHours()).padStart(2, "0") + ":" + String(ahora.getMinutes()).padStart(2, "0");
-      if (d.hora <= horaActual) errores.hora = "Esa hora ya pasó. Elija una hora posterior.";
+  } else if (!mismaFecha) {
+    if (datos.fecha < hoy) {
+      errores.fecha = "La fecha no puede ser anterior a hoy.";
+    } else if (datos.fecha > fechaTexto(limite)) {
+      errores.fecha = "Solo se puede agendar hasta 60 días antes.";
+    } else if (dia == 0) {
+      errores.fecha = "Los domingos el taller está cerrado.";
     }
   }
 
-  // Evita duplicados: el mismo vehículo no puede tener dos solicitudes activas el mismo día.
-  const duplicada = solicitudes.some(s =>
-    s.id !== idEdicion && s.vehiculo.placa === d.placa && s.fecha === d.fecha && s.estado !== "Cancelado");
-  if (duplicada && !errores.placa && !errores.fecha) errores.placa = "Ese vehículo ya tiene una solicitud para esa fecha.";
+  // horario: lunes a viernes hasta las 16:00, sabado hasta las 11:00
+  if (!HORAS.includes(datos.hora)) {
+    errores.hora = "Seleccione una hora.";
+  } else if (errores.fecha == undefined && datos.fecha != "") {
+    if (dia == 6 && datos.hora > "11:00") {
+      errores.hora = "Los sábados se atiende hasta las 12:00 (último turno 11:00).";
+    }
+    if (datos.fecha == hoy && !mismaFecha) {
+      let ahora = new Date();
+      let horaActual = String(ahora.getHours()).padStart(2, "0") + ":" + String(ahora.getMinutes()).padStart(2, "0");
+      if (datos.hora <= horaActual) {
+        errores.hora = "Esa hora ya pasó.";
+      }
+    }
+  }
 
-  if (!d.aceptaTerminos) errores.aceptaTerminos = "Debe aceptar el tratamiento de datos.";
+  // un mismo vehiculo no puede tener 2 solicitudes el mismo dia
+  let repetida = solicitudes.some(function (s) {
+    return s.id != idEdicion && s.vehiculo.placa == datos.placa && s.fecha == datos.fecha && s.estado != "Cancelado";
+  });
+  if (repetida && errores.placa == undefined && errores.fecha == undefined) {
+    errores.placa = "Ese vehículo ya tiene una solicitud para esa fecha.";
+  }
+
+  if (!datos.acepta) errores.aceptaTerminos = "Debe aceptar el tratamiento de datos.";
 
   return errores;
 }
 
-// Marca en rojo los campos con error y muestra el mensaje debajo de cada uno.
+// pinta en rojo los campos con error
 function mostrarErrores(errores) {
-  const campos = ["nombre", "telefono", "email", "placa", "marca", "modelo", "anio", "kilometraje", "servicio", "fecha", "hora", "aceptaTerminos"];
-  campos.forEach(campo => {
-    const input = $(campo);
-    const hayError = campo in errores;
-    input.classList.toggle("is-invalid", hayError);
-    const feedback = input.parentElement.querySelector(".invalid-feedback");
-    if (feedback && hayError) feedback.textContent = errores[campo];
-  });
-  $("errorCombustible").textContent = errores.combustible || "";
-  $("errorCombustible").classList.toggle("d-none", !errores.combustible);
+  let campos = ["nombre", "telefono", "email", "placa", "marca", "modelo", "anio", "kilometraje", "servicio", "fecha", "hora", "aceptaTerminos"];
+  for (let campo of campos) {
+    let input = document.getElementById(campo);
+    let mensaje = input.parentElement.querySelector(".invalid-feedback");
+    if (errores[campo]) {
+      input.classList.add("is-invalid");
+      if (mensaje) mensaje.textContent = errores[campo];
+    } else {
+      input.classList.remove("is-invalid");
+    }
+  }
+  let errorComb = document.getElementById("errorCombustible");
+  errorComb.textContent = errores.combustible || "";
+  errorComb.classList.toggle("d-none", !errores.combustible);
 }
 
-function guardarSolicitud(evento) {
-  evento.preventDefault();
-  if (usuarioActual === null) {
+function guardarSolicitud(e) {
+  e.preventDefault();
+  if (usuarioActual == null) {
     Swal.fire("Inicie sesión", "Debe iniciar sesión para registrar una solicitud.", "info");
     return;
   }
 
-  const idEdicion = $("idEdicion").value;
-  const datos = leerFormulario();
-  const errores = validarSolicitud(datos, idEdicion);
+  let idEdicion = document.getElementById("idEdicion").value;
+  let datos = leerFormulario();
+  let errores = validarSolicitud(datos, idEdicion);
   mostrarErrores(errores);
 
-  if (Object.keys(errores).length > 0) {
-    // Lista de errores para el mensaje de SweetAlert2 (map + join).
-    const lista = Object.values(errores).map(e => `<li>${e}</li>`).join("");
-    Swal.fire({ icon: "error", title: "No se guardó la solicitud", html: `<ul class="text-start">${lista}</ul>` });
+  let mensajes = Object.values(errores);
+  if (mensajes.length > 0) {
+    let lista = mensajes.map(function (m) { return "<li>" + m + "</li>"; }).join("");
+    Swal.fire({ icon: "error", title: "No se guardó la solicitud", html: '<ul class="text-start">' + lista + "</ul>" });
     return;
   }
 
-  // Determina a qué cliente pertenece la solicitud.
-  // Un cliente solo puede registrar para sí mismo; el admin puede elegir a otro cliente.
+  // el cliente registra para si mismo, el admin puede elegir otro cliente
   let usuarioId = usuarioActual.id;
-  if (esAdmin()) usuarioId = Number($("clienteDestino").value);
+  if (esAdmin()) {
+    usuarioId = Number(document.getElementById("clienteDestino").value);
+  }
 
-  const vehiculo = {
+  let cliente = { nombre: datos.nombre, telefono: datos.telefono, email: datos.email };
+  let vehiculo = {
     placa: datos.placa, marca: datos.marca, modelo: datos.modelo,
     anio: Number(datos.anio), kilometraje: Number(datos.kilometraje), combustible: datos.combustible
   };
-  const cliente = { nombre: datos.nombre, telefono: datos.telefono, email: datos.email };
 
-  if (idEdicion) {
-    // ---- UPDATE (solo administrador) ----
+  if (idEdicion != "") {
+    // ACTUALIZAR (solo admin)
     if (!exigirAdmin()) return;
-    const solicitud = solicitudes.find(s => s.id === idEdicion);
-    Object.assign(solicitud, {
-      usuarioId, cliente, vehiculo,
-      servicio: datos.servicio, adicionales: datos.adicionales,
-      fecha: datos.fecha, hora: datos.hora, observaciones: datos.observaciones,
-      actualizadoEn: new Date().toISOString()
-    });
+    let s = solicitudes.find(function (sol) { return sol.id == idEdicion; });
+    s.usuarioId = usuarioId;
+    s.cliente = cliente;
+    s.vehiculo = vehiculo;
+    s.servicio = datos.servicio;
+    s.adicionales = datos.adicionales;
+    s.fecha = datos.fecha;
+    s.hora = datos.hora;
+    s.observaciones = datos.observaciones;
     guardarDatos();
-    Swal.fire("Solicitud actualizada", `Se actualizó la solicitud ${idEdicion}.`, "success");
+    Swal.fire("Solicitud actualizada", "Se actualizó la solicitud " + idEdicion + ".", "success");
     limpiarFormulario();
-    renderizarAdmin();
     location.hash = "#admin";
   } else {
-    // ---- CREATE ----
-    const nueva = {
-      id: generarId(), usuarioId, cliente, vehiculo,
-      servicio: datos.servicio, adicionales: datos.adicionales,
-      fecha: datos.fecha, hora: datos.hora, observaciones: datos.observaciones,
-      estado: "Pendiente", creadoEn: new Date().toISOString()
+    // CREAR
+    let nueva = {
+      id: generarId(),
+      usuarioId: usuarioId,
+      cliente: cliente,
+      vehiculo: vehiculo,
+      servicio: datos.servicio,
+      adicionales: datos.adicionales,
+      fecha: datos.fecha,
+      hora: datos.hora,
+      observaciones: datos.observaciones,
+      estado: "Pendiente"
     };
     solicitudes.push(nueva);
     guardarDatos();
     Swal.fire({
       icon: "success", title: "Solicitud registrada",
-      html: `Código: <b>${nueva.id}</b><br>${SERVICIOS[nueva.servicio].nombre}<br>${formatearFecha(nueva.fecha)} a las ${nueva.hora}`
+      html: "Código: <b>" + nueva.id + "</b><br>" + SERVICIOS[nueva.servicio].nombre + "<br>" + mostrarFecha(nueva.fecha) + " a las " + nueva.hora
     });
     limpiarFormulario();
     location.hash = "#mis-mantenimientos";
   }
 
-  renderizarPerfil();
-  renderizarMisSolicitudes();
-  if (esAdmin()) renderizarAdmin();
+  mostrarPerfil();
+  mostrarMisSolicitudes();
+  if (esAdmin()) mostrarAdmin();
 }
 
 function limpiarFormulario() {
-  $("formSolicitud").reset();
-  $("idEdicion").value = "";
-  $("contadorObs").textContent = "0";
+  document.getElementById("formSolicitud").reset();
+  document.getElementById("idEdicion").value = "";
+  document.getElementById("contadorObs").textContent = "0";
   mostrarErrores({});
-  $("tituloFormulario").textContent = "Solicitud de mantenimiento";
-  $("btnGuardar").innerHTML = '<i class="bi bi-save"></i> Registrar solicitud';
-  $("btnCancelarEdicion").textContent = "Limpiar";
-  document.querySelectorAll(".fila-editando").forEach(f => f.classList.remove("fila-editando"));
-  prepararFormularioNuevo();
+  document.getElementById("tituloFormulario").textContent = "Solicitud de mantenimiento";
+  document.getElementById("btnGuardar").textContent = "Registrar solicitud";
+  document.getElementById("btnCancelarEdicion").textContent = "Limpiar";
+  ponerDatosContacto();
 }
 
-// Precarga los datos de contacto del usuario (o del cliente elegido por el admin).
-function prepararFormularioNuevo() {
-  if (usuarioActual === null || $("idEdicion").value) return;
+// pone nombre, telefono y correo del usuario (o del cliente que elige el admin)
+function ponerDatosContacto() {
+  if (usuarioActual == null) return;
   let usuario = usuarioActual;
-  if (esAdmin() && $("clienteDestino").value) {
-    usuario = usuarios.find(u => u.id === Number($("clienteDestino").value)) || usuarioActual;
+  if (esAdmin()) {
+    let idElegido = Number(document.getElementById("clienteDestino").value);
+    let elegido = usuarios.find(function (u) { return u.id == idElegido; });
+    if (elegido) usuario = elegido;
   }
-  $("nombre").value = usuario.nombre;
-  $("telefono").value = usuario.telefono;
-  $("email").value = usuario.email;
+  document.getElementById("nombre").value = usuario.nombre;
+  document.getElementById("telefono").value = usuario.telefono;
+  document.getElementById("email").value = usuario.email;
 }
 
-/* --------------------------------------------------------------------------
-   7. VISTAS DEL CLIENTE
-   -------------------------------------------------------------------------- */
 
-// Cuenta solicitudes por estado. Devuelve un diccionario { estado: cantidad }.
+// ======================= MODULO 3: CLIENTE =======================
+
+// cuenta cuantas solicitudes hay en cada estado
 function contarPorEstado(lista) {
-  const conteo = {};
-  for (const estado in ESTADOS) conteo[estado] = 0;
-  lista.forEach(s => conteo[s.estado]++);
+  let conteo = {};
+  for (let estado in ESTADOS) {
+    conteo[estado] = 0;
+  }
+  lista.forEach(function (s) {
+    conteo[s.estado]++;
+  });
   return conteo;
 }
 
-function tarjetasResumen(conteo) {
-  return Object.entries(conteo).map(([estado, cantidad]) => `
-    <div class="col-6 col-lg">
-      <div class="card resumen-estado border-${ESTADOS[estado]} shadow-sm h-100">
-        <div class="card-body py-2">
-          <div class="small text-muted">${estado}</div>
-          <div class="fs-4 fw-bold">${cantidad}</div>
+function tarjetasConteo(conteo) {
+  let html = "";
+  for (let estado in conteo) {
+    html += `
+      <div class="col-6 col-lg">
+        <div class="card resumen-estado border-${ESTADOS[estado]}">
+          <div class="card-body py-2">
+            <div class="small text-muted">${estado}</div>
+            <div class="fs-4 fw-bold">${conteo[estado]}</div>
+          </div>
         </div>
-      </div>
-    </div>`).join("");
+      </div>`;
+  }
+  return html;
 }
 
-function renderizarPerfil() {
-  const u = usuarioActual;
-  $("datosPerfil").innerHTML = `
-    <div class="d-flex align-items-center mb-3">
-      <i class="bi bi-person-circle fs-1 text-itsco me-3"></i>
-      <div>
-        <h3 class="h5 mb-0">${escaparHTML(u.nombre)}</h3>
-        <span class="badge bg-itsco-oscuro">${u.rol}</span>
-      </div>
-    </div>
-    <dl class="row mb-0">
-      <dt class="col-4">Usuario</dt><dd class="col-8">${escaparHTML(u.usuario)}</dd>
-      <dt class="col-4">Teléfono</dt><dd class="col-8">${escaparHTML(u.telefono)}</dd>
-      <dt class="col-4">Correo</dt><dd class="col-8">${escaparHTML(u.email)}</dd>
-      <dt class="col-4">Cuenta</dt><dd class="col-8">${u.activo ? "Activa" : "Deshabilitada"}</dd>
-    </dl>`;
+function mostrarPerfil() {
+  let u = usuarioActual;
+  document.getElementById("datosPerfil").innerHTML = `
+    <h3 class="h5">${escaparHTML(u.nombre)}</h3>
+    <p><span class="badge bg-secondary">${u.rol}</span></p>
+    <p class="mb-1"><b>Usuario:</b> ${escaparHTML(u.usuario)}</p>
+    <p class="mb-1"><b>Teléfono:</b> ${escaparHTML(u.telefono)}</p>
+    <p class="mb-1"><b>Correo:</b> ${escaparHTML(u.email)}</p>
+    <p class="mb-0"><b>Cuenta:</b> ${u.activo ? "Activa" : "Deshabilitada"}</p>`;
 
-  const propias = solicitudes.filter(s => s.usuarioId === u.id);
-  $("resumenPerfil").innerHTML = `<div class="col-12"><h3 class="h6 text-muted">Mis solicitudes por estado (${propias.length} en total)</h3></div>`
-    + tarjetasResumen(contarPorEstado(propias));
+  let propias = solicitudes.filter(function (s) { return s.usuarioId == u.id; });
+  document.getElementById("resumenPerfil").innerHTML =
+    '<div class="col-12"><h3 class="h6 text-muted">Mis solicitudes por estado (' + propias.length + ')</h3></div>' +
+    tarjetasConteo(contarPorEstado(propias));
 }
 
-// Muestra SOLO las solicitudes del usuario en sesión (filter por usuarioId).
-function renderizarMisSolicitudes() {
-  const propias = solicitudes
-    .filter(s => s.usuarioId === usuarioActual.id)
-    .sort((a, b) => (b.fecha + b.hora).localeCompare(a.fecha + a.hora));
+// el cliente solo ve SUS solicitudes (filter por usuarioId)
+function mostrarMisSolicitudes() {
+  let propias = solicitudes.filter(function (s) {
+    return s.usuarioId == usuarioActual.id;
+  });
+  let tabla = document.getElementById("tablaMisSolicitudes");
 
-  if (propias.length === 0) {
-    $("tablaMisSolicitudes").innerHTML = `<tr><td colspan="7" class="text-center text-muted py-4">Aún no tiene solicitudes registradas.</td></tr>`;
+  if (propias.length == 0) {
+    tabla.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-3">Aún no tiene solicitudes registradas.</td></tr>';
     return;
   }
 
-  $("tablaMisSolicitudes").innerHTML = propias.map(s => `
-    <tr>
-      <td class="fw-semibold">${s.id}</td>
-      <td>${escaparHTML(s.vehiculo.placa)}</td>
-      <td>${escaparHTML(s.vehiculo.marca)} ${escaparHTML(s.vehiculo.modelo)} (${s.vehiculo.anio})</td>
-      <td>${SERVICIOS[s.servicio].nombre}</td>
-      <td>${formatearFecha(s.fecha)}</td>
-      <td>${s.hora}</td>
-      <td>${badgeEstado(s.estado)}</td>
-    </tr>`).join("");
+  let filas = "";
+  for (let s of propias) {
+    filas += `
+      <tr>
+        <td>${s.id}</td>
+        <td>${escaparHTML(s.vehiculo.placa)}</td>
+        <td>${escaparHTML(s.vehiculo.marca)} ${escaparHTML(s.vehiculo.modelo)} (${s.vehiculo.anio})</td>
+        <td>${SERVICIOS[s.servicio].nombre}</td>
+        <td>${mostrarFecha(s.fecha)}</td>
+        <td>${s.hora}</td>
+        <td>${badgeEstado(s.estado)}</td>
+      </tr>`;
+  }
+  tabla.innerHTML = filas;
 }
 
-/* --------------------------------------------------------------------------
-   8. ADMINISTRACIÓN (CRUD, ESTADOS Y CUENTAS)
-   -------------------------------------------------------------------------- */
 
-function llenarSelectClientes() {
-  const activos = usuarios.filter(u => u.activo);
-  const seleccionado = $("clienteDestino").value;
-  $("clienteDestino").innerHTML = activos
-    .map(u => `<option value="${u.id}">${escaparHTML(u.nombre)} (${u.usuario}${u.id === usuarioActual.id ? " - yo" : ""})</option>`)
-    .join("");
-  $("clienteDestino").value = seleccionado || usuarioActual.id;
+// ======================= MODULO 3: ADMINISTRADOR =======================
 
-  $("filtroCliente").innerHTML = `<option value="">Todos los clientes</option>` + usuarios
-    .map(u => `<option value="${u.id}">${escaparHTML(u.nombre)}</option>`).join("");
+function llenarClientes() {
+  let select = document.getElementById("clienteDestino");
+  let anterior = select.value;
+  let html = "";
+  usuarios.forEach(function (u) {
+    if (u.activo) {
+      html += `<option value="${u.id}">${escaparHTML(u.nombre)} (${u.usuario})</option>`;
+    }
+  });
+  select.innerHTML = html;
+  select.value = anterior || usuarioActual.id;
+
+  let filtro = document.getElementById("filtroCliente");
+  let opciones = '<option value="">Todos los clientes</option>';
+  usuarios.forEach(function (u) {
+    opciones += `<option value="${u.id}">${escaparHTML(u.nombre)}</option>`;
+  });
+  filtro.innerHTML = opciones;
 }
 
-// READ: lista general con filtros (filter) y renderizado (map).
-function renderizarAdmin() {
+// LEER: tabla con todas las solicitudes y filtros
+function mostrarAdmin() {
   if (!esAdmin()) return;
 
-  $("resumenAdmin").innerHTML = tarjetasResumen(contarPorEstado(solicitudes));
+  document.getElementById("resumenAdmin").innerHTML = tarjetasConteo(contarPorEstado(solicitudes));
 
-  const texto = $("filtroTexto").value.trim().toLowerCase();
-  const estado = $("filtroEstado").value;
-  const clienteId = $("filtroCliente").value;
+  let texto = document.getElementById("filtroTexto").value.trim().toLowerCase();
+  let estado = document.getElementById("filtroEstado").value;
+  let cliente = document.getElementById("filtroCliente").value;
 
-  const filtradas = solicitudes.filter(s => {
-    const coincideTexto = texto === "" ||
+  let lista = solicitudes.filter(function (s) {
+    let okTexto = texto == "" ||
       s.id.toLowerCase().includes(texto) ||
       s.vehiculo.placa.toLowerCase().includes(texto) ||
       s.cliente.nombre.toLowerCase().includes(texto);
-    const coincideEstado = estado === "" || s.estado === estado;
-    const coincideCliente = clienteId === "" || s.usuarioId === Number(clienteId);
-    return coincideTexto && coincideEstado && coincideCliente;
+    let okEstado = estado == "" || s.estado == estado;
+    let okCliente = cliente == "" || s.usuarioId == Number(cliente);
+    return okTexto && okEstado && okCliente;
   });
 
-  if (filtradas.length === 0) {
-    $("tablaAdmin").innerHTML = `<tr><td colspan="7" class="text-center text-muted py-4">No hay solicitudes que coincidan.</td></tr>`;
+  let tabla = document.getElementById("tablaAdmin");
+  if (lista.length == 0) {
+    tabla.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-3">No hay solicitudes.</td></tr>';
   } else {
-    $("tablaAdmin").innerHTML = filtradas.map(s => `
-      <tr data-id="${s.id}">
-        <td class="fw-semibold">${s.id}</td>
-        <td>${escaparHTML(s.cliente.nombre)}<br><small class="text-muted">${escaparHTML(s.cliente.telefono)}</small></td>
-        <td>${escaparHTML(s.vehiculo.placa)}<br><small class="text-muted">${escaparHTML(s.vehiculo.marca)} ${escaparHTML(s.vehiculo.modelo)} · ${s.vehiculo.kilometraje.toLocaleString("es-EC")} km</small></td>
-        <td>${SERVICIOS[s.servicio].nombre}</td>
-        <td>${formatearFecha(s.fecha)}<br><small class="text-muted">${s.hora}</small></td>
-        <td>
-          <select class="form-select form-select-sm select-estado" data-id="${s.id}" aria-label="Estado de ${s.id}">
-            ${Object.keys(ESTADOS).map(e => `<option value="${e}" ${e === s.estado ? "selected" : ""}>${e}</option>`).join("")}
-          </select>
-        </td>
-        <td class="text-end">
-          <button class="btn btn-sm btn-outline-primary btn-editar" data-id="${s.id}" >Editar</button>
-          <button class="btn btn-sm btn-outline-danger btn-eliminar" data-id="${s.id}" >Eliminar</button>
-        </td>
-      </tr>`).join("");
+    tabla.innerHTML = lista.map(function (s) {
+      // opciones del select de estado
+      let opciones = "";
+      for (let e in ESTADOS) {
+        let marcado = e == s.estado ? "selected" : "";
+        opciones += `<option value="${e}" ${marcado}>${e}</option>`;
+      }
+      return `
+        <tr>
+          <td>${s.id}</td>
+          <td>${escaparHTML(s.cliente.nombre)}<br><small class="text-muted">${escaparHTML(s.cliente.telefono)}</small></td>
+          <td>${escaparHTML(s.vehiculo.placa)}<br><small class="text-muted">${escaparHTML(s.vehiculo.marca)} ${escaparHTML(s.vehiculo.modelo)} - ${s.vehiculo.kilometraje} km</small></td>
+          <td>${SERVICIOS[s.servicio].nombre}</td>
+          <td>${mostrarFecha(s.fecha)}<br><small class="text-muted">${s.hora}</small></td>
+          <td><select class="form-select form-select-sm select-estado" data-id="${s.id}">${opciones}</select></td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-editar" data-id="${s.id}">Editar</button>
+            <button class="btn btn-sm btn-eliminar texto-rojo" data-id="${s.id}">Eliminar</button>
+          </td>
+        </tr>`;
+    }).join("");
   }
 
-  renderizarUsuarios();
+  mostrarUsuarios();
 }
 
-// UPDATE de estado desde el select de la tabla.
+// ACTUALIZAR estado
 function cambiarEstado(id, nuevoEstado) {
   if (!exigirAdmin()) return;
-  if (!(nuevoEstado in ESTADOS)) return;
-  const solicitud = solicitudes.find(s => s.id === id);
-  if (!solicitud) return;
-  const anterior = solicitud.estado;
-  solicitud.estado = nuevoEstado;
-  solicitud.actualizadoEn = new Date().toISOString();
+  let s = solicitudes.find(function (sol) { return sol.id == id; });
+  if (s == undefined || ESTADOS[nuevoEstado] == undefined) return;
+
+  s.estado = nuevoEstado;
   guardarDatos();
-  renderizarAdmin();
-  renderizarPerfil();
-  renderizarMisSolicitudes();
-  toast("success", `${id}: ${anterior} → ${nuevoEstado}`);
+  mostrarAdmin();
+  mostrarPerfil();
+  mostrarMisSolicitudes();
+  mensajeCorto("success", id + " ahora está " + nuevoEstado);
 }
 
-// UPDATE completo: carga la solicitud en el formulario.
+// ACTUALIZAR: carga la solicitud en el formulario
 function editarSolicitud(id) {
   if (!exigirAdmin()) return;
-  const s = solicitudes.find(sol => sol.id === id);
-  if (!s) return;
+  let s = solicitudes.find(function (sol) { return sol.id == id; });
+  if (s == undefined) return;
 
-  $("idEdicion").value = s.id;
-  $("clienteDestino").value = s.usuarioId;
-  $("nombre").value = s.cliente.nombre;
-  $("telefono").value = s.cliente.telefono;
-  $("email").value = s.cliente.email;
-  $("placa").value = s.vehiculo.placa;
-  $("marca").value = s.vehiculo.marca;
-  $("modelo").value = s.vehiculo.modelo;
-  $("anio").value = s.vehiculo.anio;
-  $("kilometraje").value = s.vehiculo.kilometraje;
-  document.querySelectorAll('input[name="combustible"]').forEach(r => r.checked = (r.value === s.vehiculo.combustible));
-  $("servicio").value = s.servicio;
-  $("fecha").value = s.fecha;
-  $("hora").value = s.hora;
-  document.querySelectorAll('input[name="adicionales"]').forEach(chk => chk.checked = s.adicionales.includes(chk.value));
-  $("observaciones").value = s.observaciones;
-  $("contadorObs").textContent = s.observaciones.length;
-  $("aceptaTerminos").checked = true;
+  document.getElementById("idEdicion").value = s.id;
+  document.getElementById("clienteDestino").value = s.usuarioId;
+  document.getElementById("nombre").value = s.cliente.nombre;
+  document.getElementById("telefono").value = s.cliente.telefono;
+  document.getElementById("email").value = s.cliente.email;
+  document.getElementById("placa").value = s.vehiculo.placa;
+  document.getElementById("marca").value = s.vehiculo.marca;
+  document.getElementById("modelo").value = s.vehiculo.modelo;
+  document.getElementById("anio").value = s.vehiculo.anio;
+  document.getElementById("kilometraje").value = s.vehiculo.kilometraje;
+  document.getElementById("servicio").value = s.servicio;
+  document.getElementById("fecha").value = s.fecha;
+  document.getElementById("hora").value = s.hora;
+  document.getElementById("observaciones").value = s.observaciones;
+  document.getElementById("contadorObs").textContent = s.observaciones.length;
+  document.getElementById("aceptaTerminos").checked = true;
+
+  document.querySelectorAll('input[name="combustible"]').forEach(function (radio) {
+    radio.checked = radio.value == s.vehiculo.combustible;
+  });
+  document.querySelectorAll('input[name="adicionales"]').forEach(function (chk) {
+    chk.checked = s.adicionales.includes(chk.value);
+  });
+
   mostrarErrores({});
-
-  $("tituloFormulario").textContent = `Editar solicitud ${s.id}`;
-  $("btnGuardar").innerHTML = '<i class="bi bi-arrow-repeat"></i> Actualizar solicitud';
-  $("btnCancelarEdicion").textContent = "Cancelar edición";
+  document.getElementById("tituloFormulario").textContent = "Editar solicitud " + s.id;
+  document.getElementById("btnGuardar").textContent = "Actualizar solicitud";
+  document.getElementById("btnCancelarEdicion").textContent = "Cancelar edición";
   location.hash = "#solicitud";
 }
 
-// DELETE con confirmación de SweetAlert2.
+// ELIMINAR con confirmacion
 function eliminarSolicitud(id) {
   if (!exigirAdmin()) return;
-  const s = solicitudes.find(sol => sol.id === id);
-  if (!s) return;
+  let s = solicitudes.find(function (sol) { return sol.id == id; });
+  if (s == undefined) return;
 
   Swal.fire({
-    title: `¿Eliminar ${s.id}?`,
-    html: `${escaparHTML(s.cliente.nombre)} · ${escaparHTML(s.vehiculo.placa)}<br>Esta acción no se puede deshacer.`,
-    icon: "warning", showCancelButton: true,
-    confirmButtonColor: "#dc3545", confirmButtonText: "Sí, eliminar", cancelButtonText: "Cancelar"
-  }).then(resultado => {
-    if (!resultado.isConfirmed) return;
-    solicitudes = solicitudes.filter(sol => sol.id !== id);
-    guardarDatos();
-    if ($("idEdicion").value === id) limpiarFormulario();
-    renderizarAdmin();
-    renderizarPerfil();
-    renderizarMisSolicitudes();
-    toast("success", `Solicitud ${id} eliminada`);
+    title: "¿Eliminar " + s.id + "?",
+    text: s.cliente.nombre + " - " + s.vehiculo.placa + ". Esta acción no se puede deshacer.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Sí, eliminar",
+    cancelButtonText: "Cancelar"
+  }).then(function (respuesta) {
+    if (respuesta.isConfirmed) {
+      solicitudes = solicitudes.filter(function (sol) { return sol.id != id; });
+      guardarDatos();
+      if (document.getElementById("idEdicion").value == id) limpiarFormulario();
+      mostrarAdmin();
+      mostrarPerfil();
+      mostrarMisSolicitudes();
+      mensajeCorto("success", "Solicitud " + id + " eliminada");
+    }
   });
 }
 
-// Control de registros de clientes: número de solicitudes y habilitar/deshabilitar cuenta.
-function renderizarUsuarios() {
-  $("tablaUsuarios").innerHTML = usuarios.map(u => {
-    const total = solicitudes.filter(s => s.usuarioId === u.id).length;
-    const esYo = u.id === usuarioActual.id;
-    return `
+// tabla de cuentas: cuantas solicitudes tiene cada uno y habilitar/deshabilitar
+function mostrarUsuarios() {
+  let html = "";
+  for (let u of usuarios) {
+    let total = solicitudes.filter(function (s) { return s.usuarioId == u.id; }).length;
+    let estadoCuenta = u.activo ? '<span class="badge bg-success">Activa</span>' : '<span class="badge bg-danger">Deshabilitada</span>';
+    let boton = "";
+    if (u.id == usuarioActual.id) {
+      boton = '<small class="text-muted">Cuenta en uso</small>';
+    } else if (u.activo) {
+      boton = `<button class="btn btn-sm btn-cuenta texto-rojo" data-id="${u.id}">Deshabilitar</button>`;
+    } else {
+      boton = `<button class="btn btn-sm btn-cuenta texto-verde" data-id="${u.id}">Habilitar</button>`;
+    }
+    html += `
       <tr>
         <td>${escaparHTML(u.usuario)}</td>
         <td>${escaparHTML(u.nombre)}</td>
         <td>${u.rol}</td>
         <td>${total}</td>
-        <td>${u.activo ? '<span class="badge bg-success">Activa</span>' : '<span class="badge bg-danger">Deshabilitada</span>'}</td>
-        <td class="text-end">
-          ${esYo ? '<small class="text-muted">Cuenta en uso</small>' :
-            `<button class="btn btn-sm ${u.activo ? "btn-outline-danger" : "btn-outline-success"} btn-cuenta" data-id="${u.id}">
-               ${u.activo ? "Deshabilitar" : "Habilitar"}</button>`}
-        </td>
+        <td>${estadoCuenta}</td>
+        <td class="text-end">${boton}</td>
       </tr>`;
-  }).join("");
+  }
+  document.getElementById("tablaUsuarios").innerHTML = html;
 }
 
-function alternarCuenta(id) {
+function cambiarCuenta(id) {
   if (!exigirAdmin()) return;
-  const usuario = usuarios.find(u => u.id === id);
-  if (!usuario || usuario.id === usuarioActual.id) return;
-  usuario.activo = !usuario.activo;
+  let u = usuarios.find(function (usu) { return usu.id == id; });
+  if (u == undefined || u.id == usuarioActual.id) return;
+
+  u.activo = !u.activo;
   guardarDatos();
-  llenarSelectClientes();
-  renderizarAdmin();
-  toast("info", `Cuenta de ${usuario.nombre} ${usuario.activo ? "habilitada" : "deshabilitada"}`);
+  llenarClientes();
+  mostrarAdmin();
+  mensajeCorto("info", "Cuenta de " + u.nombre + (u.activo ? " habilitada" : " deshabilitada"));
 }
 
 function restablecerDatos() {
   if (!exigirAdmin()) return;
   Swal.fire({
-    title: "¿Restablecer datos de prueba?", text: "Se borrarán las solicitudes registradas y se cargarán los datos iniciales.",
-    icon: "warning", showCancelButton: true, confirmButtonText: "Restablecer", cancelButtonText: "Cancelar", confirmButtonColor: "#dc3545"
-  }).then(r => {
-    if (!r.isConfirmed) return;
-    solicitudes = structuredClone(SOLICITUDES_INICIALES);
-    usuarios = structuredClone(USUARIOS_INICIALES);
-    usuarioActual = usuarios.find(u => u.id === usuarioActual.id);
-    guardarDatos();
-    limpiarFormulario();
-    actualizarInterfaz();
-    toast("success", "Datos restablecidos");
-  });
-}
-
-/* --------------------------------------------------------------------------
-   9. EVENTOS E INICIALIZACIÓN
-   -------------------------------------------------------------------------- */
-
-function registrarEventos() {
-  $("formLogin").addEventListener("submit", iniciarSesion);
-  $("btnCerrarSesion").addEventListener("click", cerrarSesion);
-  $("formSolicitud").addEventListener("submit", guardarSolicitud);
-  $("btnCancelarEdicion").addEventListener("click", limpiarFormulario);
-
-  // Placa en mayúsculas mientras se escribe
-  $("placa").addEventListener("input", e => e.target.value = e.target.value.toUpperCase());
-  // Teléfono: solo dígitos
-  $("telefono").addEventListener("input", e => e.target.value = e.target.value.replace(/\D/g, ""));
-  // Contador de caracteres del textarea
-  $("observaciones").addEventListener("input", e => $("contadorObs").textContent = e.target.value.length);
-  // Admin: al cambiar el cliente destino se precargan sus datos de contacto
-  $("clienteDestino").addEventListener("change", prepararFormularioNuevo);
-
-  // Botones "Agendar" del catálogo y de la portada
-  $("catalogoServicios").addEventListener("click", e => {
-    const boton = e.target.closest(".btn-agendar");
-    if (!boton) return;
-    irAFormulario(boton.dataset.servicio);
-  });
-  $("btnAgendarHero").addEventListener("click", () => irAFormulario(""));
-
-  // Control de acceso al enlace de Administración (clic y cambio manual de URL)
-  $("enlaceAdmin").addEventListener("click", e => {
-    if (!verificarAccesoAdmin()) e.preventDefault();
-  });
-  window.addEventListener("hashchange", protegerRutas);
-
-  // Filtros de administración
-  ["filtroTexto", "filtroEstado", "filtroCliente"].forEach(id => $(id).addEventListener("input", renderizarAdmin));
-
-  // Delegación de eventos en la tabla de administración
-  $("tablaAdmin").addEventListener("click", e => {
-    const editar = e.target.closest(".btn-editar");
-    const eliminar = e.target.closest(".btn-eliminar");
-    if (editar) {
-      editarSolicitud(editar.dataset.id);
-      editar.closest("tr").classList.add("fila-editando");
+    title: "¿Restablecer datos de prueba?",
+    text: "Se borran las solicitudes registradas y se cargan las iniciales.",
+    icon: "warning", showCancelButton: true,
+    confirmButtonText: "Restablecer", cancelButtonText: "Cancelar"
+  }).then(function (respuesta) {
+    if (respuesta.isConfirmed) {
+      solicitudes = JSON.parse(JSON.stringify(SOLICITUDES_PRUEBA));
+      usuarios = JSON.parse(JSON.stringify(USUARIOS_PRUEBA));
+      usuarioActual = usuarios.find(function (u) { return u.id == usuarioActual.id; });
+      guardarDatos();
+      limpiarFormulario();
+      actualizarPantalla();
+      mensajeCorto("success", "Datos restablecidos");
     }
-    if (eliminar) eliminarSolicitud(eliminar.dataset.id);
   });
-  $("tablaAdmin").addEventListener("change", e => {
-    if (e.target.classList.contains("select-estado")) cambiarEstado(e.target.dataset.id, e.target.value);
-  });
-  $("tablaUsuarios").addEventListener("click", e => {
-    const boton = e.target.closest(".btn-cuenta");
-    if (boton) alternarCuenta(Number(boton.dataset.id));
-  });
-  $("btnRestablecer").addEventListener("click", restablecerDatos);
-
-  // Cierra el menú colapsado en móviles al elegir una opción
-  document.querySelectorAll("#menuPrincipal .nav-link").forEach(enlace =>
-    enlace.addEventListener("click", () => {
-      const menu = bootstrap.Collapse.getInstance($("menuPrincipal"));
-      if (menu) menu.hide();
-    }));
 }
 
-function irAFormulario(codigoServicio) {
-  if (usuarioActual === null) {
-    Swal.fire({ icon: "info", title: "Inicie sesión", text: "Para agendar un mantenimiento debe iniciar sesión.", confirmButtonText: "Iniciar sesión" })
-      .then(r => { if (r.isConfirmed) bootstrap.Modal.getOrCreateInstance($("modalLogin")).show(); });
+
+// ======================= NAVEGACION =======================
+
+function irAlFormulario(servicio) {
+  if (usuarioActual == null) {
+    Swal.fire("Inicie sesión", "Para agendar un mantenimiento debe iniciar sesión.", "info");
     return;
   }
-  if (codigoServicio) $("servicio").value = codigoServicio;
+  if (servicio) {
+    document.getElementById("servicio").value = servicio;
+  }
   location.hash = "#solicitud";
-  $("solicitud").scrollIntoView();
 }
 
-// Si alguien escribe #admin, #perfil, etc. en la URL sin permisos, se le redirige.
+// si alguien escribe #admin o #perfil en la URL sin permiso
 function protegerRutas() {
-  const destino = location.hash;
-  const privadas = ["#perfil", "#solicitud", "#mis-mantenimientos"];
-  if (destino === "#admin" && !esAdmin()) {
+  let destino = location.hash;
+  if (destino == "#admin" && !esAdmin()) {
     verificarAccesoAdmin();
     history.replaceState(null, "", "#inicio");
-  } else if (privadas.includes(destino) && usuarioActual === null) {
+  } else if ((destino == "#perfil" || destino == "#solicitud" || destino == "#mis-mantenimientos") && usuarioActual == null) {
     Swal.fire("Inicie sesión", "Esta sección requiere iniciar sesión.", "info");
     history.replaceState(null, "", "#inicio");
   }
 }
 
 function mostrarUsuariosPrueba() {
-  $("listaUsuariosPrueba").innerHTML = USUARIOS_INICIALES
-    .map(u => `<li><code>${u.usuario}</code> / <code>${u.clave}</code> - ${u.rol}${u.activo ? "" : " (deshabilitado)"}</li>`)
-    .join("");
+  let html = "";
+  USUARIOS_PRUEBA.forEach(function (u) {
+    html += `<li><code>${u.usuario}</code> / <code>${u.clave}</code> - ${u.rol}${u.activo ? "" : " (deshabilitado)"}</li>`;
+  });
+  document.getElementById("listaUsuariosPrueba").innerHTML = html;
 }
 
-function inicializar() {
+
+// ======================= EVENTOS =======================
+
+document.addEventListener("DOMContentLoaded", function () {
   cargarDatos();
-  restaurarSesion();
-  renderizarCatalogo();
-  llenarOpcionesFormulario();
+  recuperarSesion();
+  mostrarCatalogo();
+  llenarFormulario();
   mostrarUsuariosPrueba();
-  registrarEventos();
-  actualizarInterfaz();
+  actualizarPantalla();
   protegerRutas();
-}
 
-document.addEventListener("DOMContentLoaded", inicializar);
+  document.getElementById("formLogin").addEventListener("submit", iniciarSesion);
+  document.getElementById("btnCerrarSesion").addEventListener("click", cerrarSesion);
+  document.getElementById("formSolicitud").addEventListener("submit", guardarSolicitud);
+  document.getElementById("btnCancelarEdicion").addEventListener("click", limpiarFormulario);
+  document.getElementById("btnRestablecer").addEventListener("click", restablecerDatos);
+  document.getElementById("clienteDestino").addEventListener("change", ponerDatosContacto);
+  window.addEventListener("hashchange", protegerRutas);
+
+  // placa en mayusculas y telefono solo numeros
+  document.getElementById("placa").addEventListener("input", function () {
+    this.value = this.value.toUpperCase();
+  });
+  document.getElementById("telefono").addEventListener("input", function () {
+    this.value = this.value.replace(/\D/g, "");
+  });
+
+  // contador de caracteres de observaciones
+  document.getElementById("observaciones").addEventListener("input", function () {
+    document.getElementById("contadorObs").textContent = this.value.length;
+  });
+
+  // enlace de administracion: se revisa el rol antes de entrar
+  document.getElementById("enlaceAdmin").addEventListener("click", function (e) {
+    if (!verificarAccesoAdmin()) {
+      e.preventDefault();
+    }
+  });
+
+  // botones "Agendar"
+  document.getElementById("btnAgendarHero").addEventListener("click", function () {
+    irAlFormulario("");
+  });
+  document.getElementById("catalogoServicios").addEventListener("click", function (e) {
+    if (e.target.classList.contains("btn-agendar")) {
+      irAlFormulario(e.target.dataset.servicio);
+    }
+  });
+
+  // filtros del admin
+  document.getElementById("filtroTexto").addEventListener("input", mostrarAdmin);
+  document.getElementById("filtroEstado").addEventListener("change", mostrarAdmin);
+  document.getElementById("filtroCliente").addEventListener("change", mostrarAdmin);
+
+  // botones de la tabla del admin (se usa delegacion de eventos porque las filas se crean con JS)
+  document.getElementById("tablaAdmin").addEventListener("click", function (e) {
+    let id = e.target.dataset.id;
+    if (e.target.classList.contains("btn-editar")) editarSolicitud(id);
+    if (e.target.classList.contains("btn-eliminar")) eliminarSolicitud(id);
+  });
+  document.getElementById("tablaAdmin").addEventListener("change", function (e) {
+    if (e.target.classList.contains("select-estado")) {
+      cambiarEstado(e.target.dataset.id, e.target.value);
+    }
+  });
+  document.getElementById("tablaUsuarios").addEventListener("click", function (e) {
+    if (e.target.classList.contains("btn-cuenta")) {
+      cambiarCuenta(Number(e.target.dataset.id));
+    }
+  });
+});
