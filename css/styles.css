@@ -3,9 +3,52 @@
    Complementan a Bootstrap 5
    ========================================================== */
 
+/* Paleta inspirada en el sitio del Instituto Universitario Cordillera */
 :root {
-  --color-principal: #ffc107;   /* amarillo (warning de Bootstrap) */
-  --color-oscuro: #1f2328;
+  --color-principal: #1fc47c;   /* verde del logo (acento, botones) */
+  --color-principal-hover: #17a467;
+  --color-oscuro: #06393a;      /* verde azulado oscuro (navbar, footer) */
+  --color-medio: #0c5254;       /* verde azulado (portada) */
+  --color-suave: #e8f6f0;       /* fondo claro de secciones */
+}
+
+/* ---------- Clases de color propias (reemplazan a warning/dark de Bootstrap) ---------- */
+.bg-itsco        { background-color: var(--color-principal) !important; }
+.bg-itsco-oscuro { background-color: var(--color-oscuro) !important; }
+.text-itsco      { color: var(--color-principal) !important; }
+.border-itsco    { border-color: var(--color-principal) !important; }
+.bg-light        { background-color: var(--color-suave) !important; }
+
+.btn-itsco {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--color-principal);
+  --bs-btn-border-color: var(--color-principal);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--color-principal-hover);
+  --bs-btn-hover-border-color: var(--color-principal-hover);
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--color-principal-hover);
+  --bs-btn-active-border-color: var(--color-principal-hover);
+}
+.btn-outline-itsco {
+  --bs-btn-color: var(--color-oscuro);
+  --bs-btn-border-color: var(--color-oscuro);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--color-oscuro);
+  --bs-btn-hover-border-color: var(--color-oscuro);
+}
+.table-itsco {
+  --bs-table-color: #fff;
+  --bs-table-bg: var(--color-oscuro);
+  --bs-table-border-color: #0e4c4d;
+}
+.form-control:focus, .form-select:focus, .form-check-input:focus {
+  border-color: var(--color-principal);
+  box-shadow: 0 0 0 .25rem rgba(31, 196, 124, .25);
+}
+.form-check-input:checked {
+  background-color: var(--color-principal);
+  border-color: var(--color-principal);
 }
 
 html {
@@ -22,8 +65,8 @@ body {
 .hero {
   min-height: 80vh;
   background:
-    linear-gradient(rgba(20, 22, 26, .82), rgba(20, 22, 26, .82)),
-    repeating-linear-gradient(135deg, #2b2f36 0 20px, #24282e 20px 40px);
+    radial-gradient(circle at 80% 20%, rgba(31, 196, 124, .25), transparent 45%),
+    linear-gradient(135deg, var(--color-oscuro) 0%, var(--color-medio) 100%);
 }
 
 /* ---------- Títulos de sección ---------- */
@@ -75,3 +118,7 @@ body {
 
 /* Evita que los enlaces del menú se partan en dos líneas */
 .navbar .nav-link { white-space: nowrap; }
+
+/* Botón de confirmación de SweetAlert2 con el color institucional
+   (los botones de eliminar mantienen el rojo definido en script.js) */
+.swal2-styled.swal2-confirm { background-color: var(--color-principal); }

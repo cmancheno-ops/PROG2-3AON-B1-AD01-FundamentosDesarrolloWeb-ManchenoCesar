@@ -19,10 +19,10 @@
        HEADER Y NAVEGACIÓN
        ============================================================ -->
   <header>
-    <nav class="navbar navbar-expand-xl navbar-dark bg-dark fixed-top shadow">
+    <nav class="navbar navbar-expand-xl navbar-dark bg-itsco-oscuro fixed-top shadow">
       <div class="container">
         <a class="navbar-brand fw-bold" href="#inicio">
-          <i class="bi bi-gear-wide-connected text-warning"></i> Motor<span class="text-warning">Pro</span>
+          <i class="bi bi-gear-wide-connected text-itsco"></i> Motor<span class="text-itsco">Pro</span>
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuPrincipal"
                 aria-controls="menuPrincipal" aria-expanded="false" aria-label="Abrir menú">
@@ -44,7 +44,7 @@
             <li class="nav-item"><a class="nav-link" href="#admin" id="enlaceAdmin"><i class="bi bi-shield-lock"></i> Administración</a></li>
 
             <li class="nav-item ms-xl-3 sin-sesion">
-              <button class="btn btn-warning btn-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#modalLogin">
+              <button class="btn btn-itsco btn-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#modalLogin">
                 <i class="bi bi-box-arrow-in-right"></i> Iniciar sesión
               </button>
             </li>
@@ -70,19 +70,19 @@
       <div class="container py-5">
         <div class="row align-items-center g-4">
           <div class="col-lg-7">
-            <span class="badge bg-warning text-dark mb-3">Quito - Ecuador</span>
+            <span class="badge bg-itsco text-white mb-3">Quito - Ecuador</span>
             <h1 class="display-5 fw-bold">Mantenimiento automotriz confiable y a tiempo</h1>
             <p class="lead my-4">Agende el mantenimiento de su vehículo en línea, consulte el estado de su solicitud
               y reciba atención de técnicos certificados.</p>
-            <a href="#servicios" class="btn btn-warning btn-lg me-2 mb-2">Ver servicios</a>
+            <a href="#servicios" class="btn btn-itsco btn-lg me-2 mb-2">Ver servicios</a>
             <button class="btn btn-outline-light btn-lg mb-2" id="btnAgendarHero">
               <i class="bi bi-calendar-check"></i> Agendar mantenimiento
             </button>
           </div>
           <div class="col-lg-5">
-            <div class="card bg-dark bg-opacity-75 border-warning text-white">
+            <div class="card bg-itsco-oscuro bg-opacity-75 border-itsco text-white">
               <div class="card-body">
-                <h2 class="h5 card-title text-warning"><i class="bi bi-clock"></i> Horario de atención</h2>
+                <h2 class="h5 card-title text-itsco"><i class="bi bi-clock"></i> Horario de atención</h2>
                 <ul class="list-unstyled mb-0">
                   <li>Lunes a viernes: 08:00 - 17:00</li>
                   <li>Sábados: 08:00 - 12:00</li>
@@ -296,7 +296,7 @@
 
           <div class="d-flex gap-2 justify-content-end">
             <button type="button" class="btn btn-outline-secondary" id="btnCancelarEdicion">Limpiar</button>
-            <button type="submit" class="btn btn-warning fw-semibold" id="btnGuardar">
+            <button type="submit" class="btn btn-itsco fw-semibold" id="btnGuardar">
               <i class="bi bi-save"></i> Registrar solicitud
             </button>
           </div>
@@ -310,7 +310,7 @@
         <h2 class="titulo-seccion">Mis mantenimientos</h2>
         <div class="table-responsive card shadow-sm">
           <table class="table table-hover align-middle mb-0">
-            <thead class="table-dark">
+            <thead class="table-itsco">
               <tr>
                 <th>ID</th><th>Placa</th><th>Vehículo</th><th>Servicio</th><th>Fecha</th><th>Hora</th><th>Estado</th>
               </tr>
@@ -353,7 +353,7 @@
 
         <div class="table-responsive card shadow-sm mb-5">
           <table class="table table-hover align-middle mb-0">
-            <thead class="table-dark">
+            <thead class="table-itsco">
               <tr>
                 <th>ID</th><th>Cliente</th><th>Placa</th><th>Servicio</th><th>Fecha / hora</th><th>Estado</th><th class="text-end">Acciones</th>
               </tr>
@@ -380,9 +380,9 @@
       <div class="container">
         <h2 class="titulo-seccion">Contacto</h2>
         <div class="row g-4">
-          <div class="col-md-4"><i class="bi bi-geo-alt text-warning fs-4"></i><p class="mb-0">Av. Ejemplo N00-00, Quito</p></div>
-          <div class="col-md-4"><i class="bi bi-telephone text-warning fs-4"></i><p class="mb-0">(02) 000-0000</p></div>
-          <div class="col-md-4"><i class="bi bi-envelope text-warning fs-4"></i><p class="mb-0">contacto@motorpro.ec</p></div>
+          <div class="col-md-4"><i class="bi bi-geo-alt text-itsco fs-4"></i><p class="mb-0">Av. Ejemplo N00-00, Quito</p></div>
+          <div class="col-md-4"><i class="bi bi-telephone text-itsco fs-4"></i><p class="mb-0">(02) 000-0000</p></div>
+          <div class="col-md-4"><i class="bi bi-envelope text-itsco fs-4"></i><p class="mb-0">contacto@motorpro.ec</p></div>
         </div>
       </div>
     </section>
@@ -391,7 +391,7 @@
   <!-- ============================================================
        FOOTER
        ============================================================ -->
-  <footer class="bg-dark text-white-50 py-4">
+  <footer class="bg-itsco-oscuro text-white-50 py-4">
     <div class="container d-flex flex-column flex-md-row justify-content-between gap-2 small">
       <span>&copy; 2026 MotorPro - Proyecto académico ITSCO, Programación II (AD01)</span>
       <span>Desarrollado por César Mancheno</span>
@@ -404,7 +404,7 @@
   <div class="modal fade" id="modalLogin" tabindex="-1" aria-labelledby="tituloLogin" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <form class="modal-content" id="formLogin" novalidate>
-        <div class="modal-header bg-dark text-white">
+        <div class="modal-header bg-itsco-oscuro text-white">
           <h2 class="modal-title h5" id="tituloLogin"><i class="bi bi-person-lock"></i> Iniciar sesión</h2>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
@@ -423,7 +423,7 @@
           </details>
         </div>
         <div class="modal-footer">
-          <button type="submit" class="btn btn-warning w-100 fw-semibold">Ingresar</button>
+          <button type="submit" class="btn btn-itsco w-100 fw-semibold">Ingresar</button>
         </div>
       </form>
     </div>

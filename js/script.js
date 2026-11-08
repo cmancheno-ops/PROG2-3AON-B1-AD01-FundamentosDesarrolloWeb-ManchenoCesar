@@ -168,7 +168,7 @@ function renderizarCatalogo() {
           <p class="card-text fw-bold">Desde $${s.precio.toFixed(2)}</p>
         </div>
         <div class="card-footer bg-transparent border-0">
-          <button class="btn btn-outline-dark btn-sm btn-agendar" data-servicio="${codigo}">Agendar este servicio</button>
+          <button class="btn btn-outline-itsco btn-sm btn-agendar" data-servicio="${codigo}">Agendar este servicio</button>
         </div>
       </article>
     </div>`).join("");
@@ -545,10 +545,10 @@ function renderizarPerfil() {
   const u = usuarioActual;
   $("datosPerfil").innerHTML = `
     <div class="d-flex align-items-center mb-3">
-      <i class="bi bi-person-circle fs-1 text-warning me-3"></i>
+      <i class="bi bi-person-circle fs-1 text-itsco me-3"></i>
       <div>
         <h3 class="h5 mb-0">${escaparHTML(u.nombre)}</h3>
-        <span class="badge bg-dark">${u.rol}</span>
+        <span class="badge bg-itsco-oscuro">${u.rol}</span>
       </div>
     </div>
     <dl class="row mb-0">
